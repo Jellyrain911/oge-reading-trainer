@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1a2744">
+<title>OGE Reading Trainer</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════ */
+:root {
+  --navy: #1a2744;
+  --navy-mid: #2d3f5e;
+  --navy-light: #3d5278;
+  --cream: #faf6ee;
+  --cream-dark: #f0e8d8;
+  --cream-mid: #f5efe3;
+  --gold: #c19a4e;
+  --gold-light: #d4b877;
+  --gold-pale: #f0e4c8;
+  --forest: #2d6a4f;
+  --forest-light: #40916c;
+  --forest-pale: #d8f3dc;
+  --coral: #c44536;
+  --coral-light: #e07a5f;
+  --coral-pale: #fce4e0;
+  --sky: #457b9d;
+  --sky-light: #6da4c2;
+  --sky-pale: #dbeaf3;
+  --text: #2b2d42;
+  --text-mid: #555770;
+  --text-light: #8d8fa3;
+  --border: #e2ddd3;
+  --shadow-sm: 0 1px 3px rgba(26,39,68,0.06);
+  --shadow-md: 0 4px 12px rgba(26,39,68,0.08);
+  --shadow-lg: 0 8px 24px rgba(26,39,68,0.12);
+  --shadow-gold: 0 4px 16px rgba(193,154,78,0.2);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-reading: 'Crimson Pro', 'Georgia', serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+body {
+  min-height: 100dvh;
+  background: var(--cream);
+  overscroll-behavior: none;
+}
+#app {
+  min-height: 100dvh;
+  position: relative;
+}
+button {
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  cursor: pointer;
+  background: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+/* ═══════════════════════════════════════════
+   SCREEN CONTAINER
+   ═══════════════════════════════════════════ */
+.screen {
+  padding: 0 20px;
+  padding-bottom: calc(24px + var(--safe-bottom));
+  max-width: 640px;
+  margin: 0 auto;
+  animation: screenIn 0.4s var(--ease-out) both;
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════ */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(250,246,238,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+}
+.app-header-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.header-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.header-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--navy-mid);
+  padding: 6px 0;
+  transition: opacity 0.2s;
+}
+.header-back:active { opacity: 0.5; }
+.header-back svg { flex-shrink: 0; }
+.header-stats {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold);
+  background: var(--gold-pale);
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════
+   HOME SCREEN
+   ═══════════════════════════════════════════ */
+.home-hero {
+  text-align: center;
+  padding: 32px 0 8px;
+}
+.home-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 6vw, 34px);
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+.home-hero-sub {
+  font-size: 15px;
+  color: var(--text-mid);
+  line-height: 1.4;
+}
+.home-progress-bar {
+  margin: 20px 0 28px;
+  background: var(--cream-dark);
+  border-radius: 6px;
+  height: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.home-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 6px;
+  transition: width 0.8s var(--ease-out);
+}
+.home-progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-mid);
+  margin-top: -20px;
+  margin-bottom: 24px;
+  padding: 0 2px;
+}
+.home-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--coral);
+  background: var(--coral-pale);
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+
+/* Text cards */
+.text-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 20px;
+}
+.text-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.text-card:active {
+  transform: scale(0.98);
+}
+.text-card-emoji {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: var(--cream-mid);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+.text-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.text-card-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.text-card-meta {
+  font-size: 13px;
+  color: var(--text-light);
+}
+.text-card-badge {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.text-card-score {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+.mastery-seal {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.mastery-none { background: var(--cream-dark); }
+.mastery-bronze { background: #e8d5b7; }
+.mastery-silver { background: #dfe3e8; }
+.mastery-gold { background: var(--gold-pale); box-shadow: var(--shadow-gold); }
+.mastery-diamond { background: linear-gradient(135deg, #e8f0fe, #fce4ec, #e8f0fe); box-shadow: 0 2px 12px rgba(100,100,255,0.2); }
+
+.text-card-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--cream-dark);
+}
+.text-card-progress-fill {
+  height: 100%;
+  border-radius: 0 3px 0 0;
+  transition: width 0.6s var(--ease-out);
+}
+.progress-green { background: var(--forest); }
+.progress-gold { background: var(--gold); }
+
+/* ═══════════════════════════════════════════
+   READING SCREEN
+   ═══════════════════════════════════════════ */
+.reading-header {
+  text-align: center;
+  padding: 28px 0 20px;
+}
+.reading-emoji {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+.reading-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 5.5vw, 32px);
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.15;
+  margin-bottom: 6px;
+}
+.reading-hint {
+  font-size: 14px;
+  color: var(--text-light);
+  font-style: italic;
+}
+.reading-divider {
+  width: 60px;
+  height: 2px;
+  background: var(--gold);
+  margin: 20px auto;
+  border-radius: 1px;
+}
+.reading-instruction {
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.5;
+  padding: 14px 16px;
+  background: var(--sky-pale);
+  border-left: 3px solid var(--sky);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 24px;
+}
+.reading-text {
+  font-family: var(--font-reading);
+  font-size: 18px;
+  line-height: 1.75;
+  color: var(--text);
+  text-align: justify;
+  hyphens: auto;
+  margin-bottom: 32px;
+}
+.reading-text p {
+  margin-bottom: 14px;
+  text-indent: 1.5em;
+}
+.reading-text p:first-child {
+  text-indent: 0;
+}
+.start-quiz-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--navy);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.15s var(--ease-out), box-shadow 0.15s;
+  margin-bottom: 12px;
+}
+.start-quiz-btn:active {
+  transform: scale(0.97);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ═══════════════════════════════════════════
+   QUIZ SCREEN
+   ═══════════════════════════════════════════ */
+.quiz-progress {
+  display: flex;
+  gap: 6px;
+  padding: 20px 0 8px;
+  justify-content: center;
+}
+.quiz-dot {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--cream-dark);
+  transition: background 0.3s, transform 0.3s;
+}
+.quiz-dot.active { background: var(--navy); transform: scaleY(1.5); }
+.quiz-dot.correct { background: var(--forest); }
+.quiz-dot.wrong { background: var(--coral); }
+
+.quiz-question-num {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 16px 0 8px;
+}
+.quiz-statement {
+  font-family: var(--font-reading);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--navy);
+  text-align: center;
+  padding: 12px 8px 32px;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.quiz-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 16px;
+}
+.answer-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+  transition: transform 0.15s var(--ease-out), border-color 0.2s, background 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.answer-btn:active:not(.answered) { transform: scale(0.97); }
+.answer-btn .answer-indicator {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.3s, color 0.3s;
+}
+.answer-btn[data-answer="1"] .answer-indicator { background: var(--forest-pale); color: var(--forest); }
+.answer-btn[data-answer="2"] .answer-indicator { background: var(--coral-pale); color: var(--coral); }
+.answer-btn[data-answer="3"] .answer-indicator { background: var(--sky-pale); color: var(--sky); }
+
+.answer-btn.selected-correct {
+  border-color: var(--forest);
+  background: var(--forest-pale);
+}
+.answer-btn.selected-correct .answer-indicator { background: var(--forest); color: #fff; }
+.answer-btn.selected-wrong {
+  border-color: var(--coral);
+  background: var(--coral-pale);
+  animation: shake 0.4s var(--ease-out);
+}
+.answer-btn.selected-wrong .answer-indicator { background: var(--coral); color: #fff; }
+.answer-btn.reveal-correct {
+  border-color: var(--forest);
+  background: var(--forest-pale);
+}
+.answer-btn.reveal-correct .answer-indicator { background: var(--forest); color: #fff; }
+.answer-btn.answered {
+  pointer-events: none;
+  opacity: 0.6;
+}
+.answer-btn.selected-correct.answered,
+.answer-btn.selected-wrong.answered,
+.answer-btn.reveal-correct.answered { opacity: 1; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Explanation panel */
+.explanation-panel {
+  margin-top: 16px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  animation: slideUp 0.4s var(--ease-out) both;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.explanation-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  margin-bottom: 10px;
+}
+.explanation-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-mid);
+  margin-bottom: 14px;
+}
+.explanation-quote {
+  font-family: var(--font-reading);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--navy);
+  padding: 12px 14px;
+  background: var(--cream-mid);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 16px;
+}
+.quiz-next-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--navy);
+  border-radius: var(--radius-md);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s var(--ease-out);
+}
+.quiz-next-btn:active { transform: scale(0.97); }
+
+/* Show text button */
+.show-text-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-mid);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+.show-text-btn:active { background: var(--cream-dark); }
+
+/* Bottom sheet */
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,39,68,0.3);
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.bottom-sheet-overlay.open { opacity: 1; pointer-events: auto; }
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 75dvh;
+  background: var(--cream);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  box-shadow: 0 -4px 24px rgba(26,39,68,0.15);
+  z-index: 201;
+  transform: translateY(100%);
+  transition: transform 0.35s var(--ease-out);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 20px calc(20px + var(--safe-bottom));
+}
+.bottom-sheet.open { transform: translateY(0); }
+.bottom-sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 10px auto 16px;
+}
+.bottom-sheet-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 14px;
+}
+.bottom-sheet-text {
+  font-family: var(--font-reading);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text);
+  padding-bottom: 16px;
+}
+.bottom-sheet-text p {
+  margin-bottom: 10px;
+  text-indent: 1.2em;
+}
+.bottom-sheet-text p:first-child { text-indent: 0; }
+.bottom-sheet-close {
+  position: sticky;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--cream);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════
+   RESULTS SCREEN
+   ═══════════════════════════════════════════ */
+.results-hero {
+  text-align: center;
+  padding: 36px 0 24px;
+}
+.results-ring-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 20px;
+}
+.results-ring-wrap svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.results-ring-bg {
+  fill: none;
+  stroke: var(--cream-dark);
+  stroke-width: 8;
+}
+.results-ring-fill {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.2s var(--ease-out);
+}
+.results-score {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.results-score-num {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+}
+.results-score-label {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+.results-message {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.results-sub {
+  font-size: 15px;
+  color: var(--text-mid);
+  line-height: 1.4;
+}
+.results-mastery {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Results question list */
+.results-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 24px 0;
+}
+.results-q-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: #fff;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.results-q-item:active { background: var(--cream-mid); }
+.results-q-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.results-q-icon.correct { background: var(--forest-pale); color: var(--forest); }
+.results-q-icon.wrong { background: var(--coral-pale); color: var(--coral); }
+.results-q-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text);
+  flex: 1;
+}
+.results-q-answer {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+
+.results-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--navy);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.15s var(--ease-out);
+}
+.btn-primary:active { transform: scale(0.97); }
+.btn-secondary {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--cream-dark);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  transition: transform 0.15s var(--ease-out);
+}
+.btn-secondary:active { transform: scale(0.97); }
+
+/* ═══════════════════════════════════════════
+   PROGRESS SCREEN
+   ═══════════════════════════════════════════ */
+.progress-header {
+  text-align: center;
+  padding: 28px 0 24px;
+}
+.progress-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.progress-sub {
+  font-size: 14px;
+  color: var(--text-mid);
+}
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  text-align: center;
+  padding: 16px 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text-light);
+}
+.progress-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.progress-row-emoji { font-size: 22px; }
+.progress-row-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+.progress-row-score {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+.progress-reset {
+  margin-top: 32px;
+  padding: 12px;
+  font-size: 14px;
+  color: var(--coral);
+  text-align: center;
+  width: 100%;
+  border-radius: var(--radius-md);
+  transition: background 0.2s;
+}
+.progress-reset:active { background: var(--coral-pale); }
+
+/* ═══════════════════════════════════════════
+   CONFETTI
+   ═══════════════════════════════════════════ */
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 300;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotateZ(0deg) rotateX(0deg); opacity: 1; }
+  75% { opacity: 1; }
+  100% { transform: translateY(100vh) rotateZ(720deg) rotateX(360deg); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════
+   UTILITY
+   ═══════════════════════════════════════════ */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+.stagger-9 { animation-delay: 0.45s; }
+
+.fade-in {
+  animation: fadeIn 0.5s var(--ease-out) both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .text-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .quiz-statement { font-size: 22px; padding: 20px 16px 40px; }
+  .answer-btn { padding: 18px 20px; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="application/json" id="exam-data">
+{
+  "texts": [
+    {
+      "id": 1,
+      "slug": "the-owl",
+      "title": "The Owl",
+      "emoji": "\ud83e\udd89",
+      "text": "Joan Harrison was walking along the street. She was shy and always felt lonely and upset. Joan worked as a secretary in an office in the city centre. It was lunch time and she went out to get some air. She was looking absently at the shop-windows when she saw a brown wooden owl in one of them. Suddenly Joan stopped. Joan was totally indifferent to birds and she had never understood people who collected useless statues. But for some reason she could not take her eyes off the owl. The wooden owl drew Joan to itself.\n\nJoan decided to buy the owl. She earned a little, just to pay for her room and food. She couldn\u2019t afford new clothes. Even a ticket to the cinema was a heavy expense for her. But this time Joan was sure that she had to buy the wooden owl.\n\nJoan opened the door of the shop. She asked the shop assistant about the price of the wooden owl. It was fifty pounds. Joan understood that it was sheer madness to buy such an expensive wooden bird. But she did it without any hesitation.\n\nThe next morning she left her house in a very good mood. Now, having the owl at home, Joan made it a habit to say good-bye and touch the owl\u2019s head before leaving. Amazingly, after this simple gesture she was cheerful and energetic the whole day. One morning, when patting the owl on the head, Joan remembered her wish to join the evening pottery class at college. She had often thought about it but always changed her mind at the last moment. Now she decided to fulfill her wish.\n\nAt the pottery class Joan achieved considerable results. Her teacher said she had a unique style. Nobody knew that she worked hard at home. Under the owl\u2019s observation Joan experimented with forms and colours. Once she took part in the students\u2019 show at the college, and the Museum of Arts asked her to sell her works for two thousand pounds. The sum covered all her debts and she could afford to buy a new dress and shoes and even more.\n\nThe next step was the annual National Art Festival, at which a secretary, Joan Harrison, presented her personal exhibition. Her fame and income were growing. Joan left her office and became a potter. A year later she and the art director of the museum were happily married. They moved to a large country house and now Joan had her own pottery.\n\nJoan took the lucky owl with her. It took its honorary place in the large living room. In her last years she often remembered the shop where she had bought the owl, her evening classes and her first steps in pottery. Joan was so proud of the owl that each piece of her pottery had a picture of the owl on it. Lots of famous artists and important people visited Joan and her husband, but Joan never gave her owl to anybody until her dying day.",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "Joan collected small statues of birds.",
+          "answer": 2,
+          "evidence": "Joan was totally indifferent to birds and she had never understood people who collected useless statues.",
+          "explanation": "\u042d\u0442\u043e \u043d\u0435\u0432\u0435\u0440\u043d\u043e. \u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043f\u0440\u044f\u043c\u043e \u0441\u043a\u0430\u0437\u0430\u043d\u043e, \u0447\u0442\u043e \u0414\u0436\u043e\u0430\u043d \u0431\u044b\u043b\u0430 \u0441\u043e\u0432\u0435\u0440\u0448\u0435\u043d\u043d\u043e \u0440\u0430\u0432\u043d\u043e\u0434\u0443\u0448\u043d\u0430 \u043a \u043f\u0442\u0438\u0446\u0430\u043c \u0438 \u043d\u0435 \u043f\u043e\u043d\u0438\u043c\u0430\u043b\u0430 \u043b\u044e\u0434\u0435\u0439, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0441\u043e\u0431\u0438\u0440\u0430\u043b\u0438 \u0441\u0442\u0430\u0442\u0443\u044d\u0442\u043a\u0438. \u041e\u043d\u0430 \u043d\u0435 \u043a\u043e\u043b\u043b\u0435\u043a\u0446\u0438\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043b\u0430 \u0438\u0445 \u2014 \u043d\u0430\u043e\u0431\u043e\u0440\u043e\u0442."
+        },
+        {
+          "num": 14,
+          "statement": "Joan had a well-paid job.",
+          "answer": 2,
+          "evidence": "She earned a little, just to pay for her room and food. She couldn\u2019t afford new clothes.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0414\u0436\u043e\u0430\u043d \u0437\u0430\u0440\u0430\u0431\u0430\u0442\u044b\u0432\u0430\u043b\u0430 \u043c\u0430\u043b\u043e \u2014 \u0442\u043e\u043b\u044c\u043a\u043e \u043d\u0430 \u043a\u043e\u043c\u043d\u0430\u0442\u0443 \u0438 \u0435\u0434\u0443. \u041d\u0435 \u043c\u043e\u0433\u043b\u0430 \u043f\u043e\u0437\u0432\u043e\u043b\u0438\u0442\u044c \u0441\u0435\u0431\u0435 \u0434\u0430\u0436\u0435 \u043d\u043e\u0432\u0443\u044e \u043e\u0434\u0435\u0436\u0434\u0443. \u042d\u0442\u043e \u044f\u0432\u043d\u043e \u043d\u0435 \u0445\u043e\u0440\u043e\u0448\u043e \u043e\u043f\u043b\u0430\u0447\u0438\u0432\u0430\u0435\u043c\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430."
+        },
+        {
+          "num": 15,
+          "statement": "The wooden owl improved Joan\u2019s mood.",
+          "answer": 1,
+          "evidence": "The next morning she left her house in a very good mood... after this simple gesture she was cheerful and energetic the whole day.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041f\u043e\u0441\u043b\u0435 \u043f\u043e\u043a\u0443\u043f\u043a\u0438 \u0441\u043e\u0432\u044b \u0414\u0436\u043e\u0430\u043d \u0441\u0442\u0430\u043b\u0430 \u0432\u044b\u0445\u043e\u0434\u0438\u0442\u044c \u0438\u0437 \u0434\u043e\u043c\u0430 \u0432 \u043e\u0442\u043b\u0438\u0447\u043d\u043e\u043c \u043d\u0430\u0441\u0442\u0440\u043e\u0435\u043d\u0438\u0438, \u0431\u044b\u043b\u0430 \u0431\u043e\u0434\u0440\u043e\u0439 \u0438 \u044d\u043d\u0435\u0440\u0433\u0438\u0447\u043d\u043e\u0439 \u0432\u0435\u0441\u044c \u0434\u0435\u043d\u044c."
+        },
+        {
+          "num": 16,
+          "statement": "Joan joined the pottery class because of her friends\u2019 advice.",
+          "answer": 2,
+          "evidence": "Joan remembered her wish to join the evening pottery class at college. She had often thought about it but always changed her mind at the last moment.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0414\u0436\u043e\u0430\u043d \u043f\u043e\u0448\u043b\u0430 \u043d\u0430 \u043a\u0435\u0440\u0430\u043c\u0438\u043a\u0443 \u043f\u043e \u0441\u043e\u0431\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u043c\u0443 \u0436\u0435\u043b\u0430\u043d\u0438\u044e, \u043a\u043e\u0442\u043e\u0440\u043e\u0435 \u0434\u0430\u0432\u043d\u043e \u0432\u044b\u043d\u0430\u0448\u0438\u0432\u0430\u043b\u0430. \u041d\u0438\u043a\u0430\u043a\u0438\u0435 \u043f\u043e\u0434\u0440\u0443\u0433\u0438 \u0435\u0439 \u044d\u0442\u043e \u043d\u0435 \u0441\u043e\u0432\u0435\u0442\u043e\u0432\u0430\u043b\u0438."
+        },
+        {
+          "num": 17,
+          "statement": "Joan successfully participated in art exhibitions.",
+          "answer": 1,
+          "evidence": "Once she took part in the students\u2019 show at the college, and the Museum of Arts asked her to sell her works... The next step was the annual National Art Festival.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0414\u0436\u043e\u0430\u043d \u0443\u0447\u0430\u0441\u0442\u0432\u043e\u0432\u0430\u043b\u0430 \u0432 \u0441\u0442\u0443\u0434\u0435\u043d\u0447\u0435\u0441\u043a\u043e\u0439 \u0432\u044b\u0441\u0442\u0430\u0432\u043a\u0435 \u0438 \u041d\u0430\u0446\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u043e\u043c \u0444\u0435\u0441\u0442\u0438\u0432\u0430\u043b\u0435 \u0438\u0441\u043a\u0443\u0441\u0441\u0442\u0432, \u0435\u0451 \u0440\u0430\u0431\u043e\u0442\u044b \u043f\u0440\u043e\u0434\u0430\u0432\u0430\u043b\u0438\u0441\u044c."
+        },
+        {
+          "num": 18,
+          "statement": "There was an image of the owl on Joan\u2019s every work.",
+          "answer": 1,
+          "evidence": "Joan was so proud of the owl that each piece of her pottery had a picture of the owl on it.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041d\u0430 \u043a\u0430\u0436\u0434\u043e\u043c \u0438\u0437\u0434\u0435\u043b\u0438\u0438 \u0414\u0436\u043e\u0430\u043d \u0431\u044b\u043b\u043e \u0438\u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u0435 \u0441\u043e\u0432\u044b."
+        },
+        {
+          "num": 19,
+          "statement": "After Joan\u2019s death the wooden owl disappeared from her house.",
+          "answer": 3,
+          "evidence": "Joan never gave her owl to anybody until her dying day.",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u041c\u044b \u0437\u043d\u0430\u0435\u043c \u0442\u043e\u043b\u044c\u043a\u043e, \u0447\u0442\u043e \u043f\u0440\u0438 \u0436\u0438\u0437\u043d\u0438 \u0414\u0436\u043e\u0430\u043d \u043d\u0438\u043a\u043e\u043c\u0443 \u043d\u0435 \u043e\u0442\u0434\u0430\u0432\u0430\u043b\u0430 \u0441\u043e\u0432\u0443. \u041d\u043e \u0447\u0442\u043e \u0441\u043b\u0443\u0447\u0438\u043b\u043e\u0441\u044c \u0441 \u0441\u043e\u0432\u043e\u0439 \u043f\u043e\u0441\u043b\u0435 \u0435\u0451 \u0441\u043c\u0435\u0440\u0442\u0438 \u2014 \u043d\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043d\u043e."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "slug": "cambridge-university",
+      "title": "Cambridge University",
+      "emoji": "\ud83c\udfdb\ufe0f",
+      "text": "Cambridge University is the second-oldest university in the English-speaking world (after the University of Oxford) and the seventh-oldest in the world.\n\nThe story of Cambridge University begins in 1209 when several hundred students arrived in the little town of Cambridge after having walked 60 miles from Oxford. These students were all churchmen and had been studying in Oxford at that city\u2019s well-known schools. It was a hard life at Oxford for there was constant trouble, even fighting, between the citizens of the town and the students. Then one day a student accidentally killed a man of the town. The Mayor arrested three other students who were innocent and they were put to death. In protest, many students left Oxford, some of them went to Cambridge. And so the new University began.\n\nIt was Cambridge University. Of course, there were no Colleges in those early days and student life was very different from what it is now. The students were of all ages and came from anywhere and everywhere. Life in College was strict. The students were forbidden to play games, to sing (except sacred music), to hunt or fish or even to dance. Books were very rare and all the lessons were in the Latin language which students were supposed to speak even among themselves.\n\nIn 1440 King Henry VI founded King\u2019s College, and other colleges followed. Nowadays there are more than 30 different colleges, including five for women students and several mixed colleges, in the University. The number of students in colleges is different: from 30 to 400 or 500.\n\nThe training course lasts 4 years. The academic year is divided into 3 terms. The students study natural and technical sciences, law, history, languages, geography, medicine, economics, agriculture, music and many other subjects. After 3 years of study a student may proceed to a Bachelor\u2019s degree, and later to the degrees of Master and Doctor.\n\nThere are many ancient traditions that are still observed at Cambridge. For example, the students are required to wear gowns at lectures, in the University library, in the street in the evening, for dinners in the colleges and for official visits.\n\nAll the students must pay for their education \u2013 classes, examinations, books, laboratories, university hostel, the use of libraries. The cost is high. It depends on college and university specialty. Very few students get grants.\n\nMany great men studied at Cambridge, for example, Bacon (the philosopher), Milton and Byron (the poets), Cromwell (the soldier), Newton (the outstanding physicist), Darwin (who is famous for his theory of evolution) and Kapitsa (the famous Russian physicist).",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "Cambridge University was founded earlier than the University of Oxford.",
+          "answer": 2,
+          "evidence": "Cambridge University is the second-oldest university in the English-speaking world (after the University of Oxford).",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041a\u0435\u043c\u0431\u0440\u0438\u0434\u0436 \u2014 \u0432\u0442\u043e\u0440\u043e\u0439 \u043f\u043e \u0441\u0442\u0430\u0440\u0448\u0438\u043d\u0441\u0442\u0432\u0443 \u043f\u043e\u0441\u043b\u0435 \u041e\u043a\u0441\u0444\u043e\u0440\u0434\u0430. \u0417\u043d\u0430\u0447\u0438\u0442, \u041e\u043a\u0441\u0444\u043e\u0440\u0434 \u0431\u044b\u043b \u043e\u0441\u043d\u043e\u0432\u0430\u043d \u0440\u0430\u043d\u044c\u0448\u0435."
+        },
+        {
+          "num": 14,
+          "statement": "The citizens of Cambridge were happy to get the university in their town.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0423\u043f\u043e\u043c\u0438\u043d\u0430\u0435\u0442\u0441\u044f \u0442\u043e\u043b\u044c\u043a\u043e \u043a\u043e\u043d\u0444\u043b\u0438\u043a\u0442 \u0432 \u041e\u043a\u0441\u0444\u043e\u0440\u0434\u0435 \u043c\u0435\u0436\u0434\u0443 \u0441\u0442\u0443\u0434\u0435\u043d\u0442\u0430\u043c\u0438 \u0438 \u0433\u043e\u0440\u043e\u0436\u0430\u043d\u0430\u043c\u0438. \u041e\u0431 \u043e\u0442\u043d\u043e\u0448\u0435\u043d\u0438\u0438 \u0436\u0438\u0442\u0435\u043b\u0435\u0439 \u041a\u0435\u043c\u0431\u0440\u0438\u0434\u0436\u0430 \u043a \u043f\u043e\u044f\u0432\u043b\u0435\u043d\u0438\u044e \u0443\u043d\u0438\u0432\u0435\u0440\u0441\u0438\u0442\u0435\u0442\u0430 \u043d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0433\u043e\u0432\u043e\u0440\u0438\u0442\u0441\u044f."
+        },
+        {
+          "num": 15,
+          "statement": "Nowadays there are several female colleges in Cambridge University.",
+          "answer": 1,
+          "evidence": "Nowadays there are more than 30 different colleges, including five for women students and several mixed colleges.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0421\u0435\u0439\u0447\u0430\u0441 \u0435\u0441\u0442\u044c \u043f\u044f\u0442\u044c \u0436\u0435\u043d\u0441\u043a\u0438\u0445 \u043a\u043e\u043b\u043b\u0435\u0434\u0436\u0435\u0439 \u0438 \u043d\u0435\u0441\u043a\u043e\u043b\u044c\u043a\u043e \u0441\u043c\u0435\u0448\u0430\u043d\u043d\u044b\u0445."
+        },
+        {
+          "num": 16,
+          "statement": "At present, the students of Cambridge University have to study Latin.",
+          "answer": 3,
+          "evidence": "all the lessons were in the Latin language which students were supposed to speak even among themselves.",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u041b\u0430\u0442\u044b\u043d\u044c \u0443\u043f\u043e\u043c\u0438\u043d\u0430\u0435\u0442\u0441\u044f \u0442\u043e\u043b\u044c\u043a\u043e \u0432 \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442\u0435 \u0440\u0430\u043d\u043d\u0438\u0445 \u0434\u043d\u0435\u0439 \u0443\u043d\u0438\u0432\u0435\u0440\u0441\u0438\u0442\u0435\u0442\u0430 (in those early days). \u041e \u0441\u043e\u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e\u043c \u0438\u0437\u0443\u0447\u0435\u043d\u0438\u0438 \u043b\u0430\u0442\u044b\u043d\u0438 \u043d\u0435\u0442 \u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u0438."
+        },
+        {
+          "num": 17,
+          "statement": "The students of Cambridge University have their own dress code.",
+          "answer": 1,
+          "evidence": "the students are required to wear gowns at lectures, in the University library, in the street in the evening, for dinners in the colleges and for official visits.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0421\u0442\u0443\u0434\u0435\u043d\u0442\u044b \u0434\u043e\u043b\u0436\u043d\u044b \u043d\u043e\u0441\u0438\u0442\u044c \u043c\u0430\u043d\u0442\u0438\u0438 \u043d\u0430 \u043b\u0435\u043a\u0446\u0438\u044f\u0445, \u0432 \u0431\u0438\u0431\u043b\u0438\u043e\u0442\u0435\u043a\u0435, \u043d\u0430 \u043e\u0444\u0438\u0446\u0438\u0430\u043b\u044c\u043d\u044b\u0445 \u043c\u0435\u0440\u043e\u043f\u0440\u0438\u044f\u0442\u0438\u044f\u0445 \u2014 \u044d\u0442\u043e \u0438 \u0435\u0441\u0442\u044c dress code."
+        },
+        {
+          "num": 18,
+          "statement": "The education at Cambridge University is free.",
+          "answer": 2,
+          "evidence": "All the students must pay for their education \u2013 classes, examinations, books, laboratories, university hostel, the use of libraries. The cost is high.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u043f\u043b\u0430\u0442\u043d\u043e\u0435 \u0438 \u0434\u043e\u0440\u043e\u0433\u043e\u0435. \u0421\u0442\u0443\u0434\u0435\u043d\u0442\u044b \u043f\u043b\u0430\u0442\u044f\u0442 \u0437\u0430 \u0432\u0441\u0451."
+        },
+        {
+          "num": 19,
+          "statement": "There are famous scientists among the graduates of Cambridge University.",
+          "answer": 1,
+          "evidence": "Many great men studied at Cambridge, for example, Bacon... Newton... Darwin... and Kapitsa.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0421\u0440\u0435\u0434\u0438 \u0432\u044b\u043f\u0443\u0441\u043a\u043d\u0438\u043a\u043e\u0432 \u2014 \u041d\u044c\u044e\u0442\u043e\u043d, \u0414\u0430\u0440\u0432\u0438\u043d, \u041a\u0430\u043f\u0438\u0446\u0430 \u0438 \u0434\u0440\u0443\u0433\u0438\u0435 \u0432\u0435\u043b\u0438\u043a\u0438\u0435 \u0443\u0447\u0451\u043d\u044b\u0435."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "slug": "eton",
+      "title": "Eton",
+      "emoji": "\ud83c\udff0",
+      "text": "Within a ten minute walk of Windsor Castle, across a bridge over the River Thames, there\u2019s an old Gothic building. It is the legendary Eton College. It is one of England\u2019s largest independent schools and one of the highest in prestige. Members of the British royal family are traditionally educated here. It was one of the best schools when first founded and remains so now; it is still commonly known as one of the greatest schools among all the schools in the world.\n\nFollowing the old tradition, Eton is a full boarding school, which means all students live and study at the school with their fellow students throughout the school year. Eton is also one of the four remaining boys\u2019 schools, so there\u2019s no opportunity for a girl to study there. Eton students traditionally come from England\u2019s wealthiest and most prestigious families, many of them aristocratic. Boys enter Eton at about 13 and continue to study there until they are ready to enter university.\n\nThe school was founded by Henry VI in the fifteenth century to provide free education for poor pupils who would then go on to get a higher education at King\u2019s College in Cambridge. That connection no longer exists today.\n\nAll students have a uniform of a black tailcoat and a waistcoat, a white collar and dark trousers. All students wear a white tie. This uniform is not for special occasions, it is worn at all times for all classes. If you visit Eton during term time, you will see students walking along the streets with books under their arms dressed in their uniforms.\n\nAt Eton, there are dozens of organisations known as \u2018societies\u2019, in many of which students come together to discuss a particular topic. The societies are traditionally governed by the boys themselves. Societies range from astronomy to Scottish dancing and stamp-collecting. Some of them are dedicated to music, some to arts, some to languages, and so on. Meetings are usually held after supper and often include a guest speaker. Among past guest speakers were composer Andrew Lloyd Webber, writer J. K. Rowling, designer Vivienne Westwood, and actor Ralph Fiennes.\n\nOne of the oldest and most influential Eton societies is called the Pop. Its members are like school head-boys or prefects who are given limited authority over other students. They are called Poppers and take an active part in many official events of the school year, including parents\u2019 evenings. While all students wear black waistcoats, members of the Pop are allowed to wear any waistcoat they please. Prince William, when he was a Popper, wore a waistcoat designed like the British national flag. The style immediately became popular.\n\nIrrespective of this, the official colour of the college is the so-called \u2018Eton blue\u2019. It\u2019s a light blue-green colour which has been used since the early 19th century. The main purpose was to identify Eton sportsmen in rowing races and on the cricket field.",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "Eton is the oldest boarding school in Great Britain.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0418\u0442\u043e\u043d \u043d\u0430\u0437\u044b\u0432\u0430\u044e\u0442 \u043e\u0434\u043d\u043e\u0439 \u0438\u0437 \u043b\u0443\u0447\u0448\u0438\u0445 \u0448\u043a\u043e\u043b, \u043d\u043e \u043d\u0438\u0433\u0434\u0435 \u043d\u0435 \u0433\u043e\u0432\u043e\u0440\u0438\u0442\u0441\u044f, \u0447\u0442\u043e \u044d\u0442\u043e \u0441\u0430\u043c\u0430\u044f \u0441\u0442\u0430\u0440\u0430\u044f \u0448\u043a\u043e\u043b\u0430-\u043f\u0430\u043d\u0441\u0438\u043e\u043d."
+        },
+        {
+          "num": 14,
+          "statement": "In our time, girls are allowed to enter Eton College.",
+          "answer": 2,
+          "evidence": "Eton is also one of the four remaining boys\u2019 schools, so there\u2019s no opportunity for a girl to study there.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0418\u0442\u043e\u043d \u2014 \u0448\u043a\u043e\u043b\u0430 \u0434\u043b\u044f \u043c\u0430\u043b\u044c\u0447\u0438\u043a\u043e\u0432, \u0434\u0435\u0432\u043e\u0447\u043a\u0438 \u043d\u0435 \u043c\u043e\u0433\u0443\u0442 \u0442\u0430\u043c \u0443\u0447\u0438\u0442\u044c\u0441\u044f."
+        },
+        {
+          "num": 15,
+          "statement": "Eton College was established to educate the children of the wealthiest British families.",
+          "answer": 2,
+          "evidence": "The school was founded by Henry VI in the fifteenth century to provide free education for poor pupils.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0428\u043a\u043e\u043b\u0443 \u043e\u0441\u043d\u043e\u0432\u0430\u043b\u0438 \u0434\u043b\u044f \u0431\u0435\u0434\u043d\u044b\u0445 \u0443\u0447\u0435\u043d\u0438\u043a\u043e\u0432 (poor pupils), \u0430 \u043d\u0435 \u0434\u043b\u044f \u0431\u043e\u0433\u0430\u0442\u044b\u0445. \u042d\u0442\u043e \u043b\u043e\u0432\u0443\u0448\u043a\u0430 \u2014 \u0441\u0435\u0439\u0447\u0430\u0441 \u0442\u0430\u043c \u0443\u0447\u0430\u0442\u0441\u044f \u0434\u0435\u0442\u0438 \u0431\u043e\u0433\u0430\u0442\u044b\u0445 \u0441\u0435\u043c\u0435\u0439, \u043d\u043e \u043e\u0441\u043d\u043e\u0432\u0430\u043d\u0430 \u0448\u043a\u043e\u043b\u0430 \u0431\u044b\u043b\u0430 \u0434\u043b\u044f \u0431\u0435\u0434\u043d\u044b\u0445."
+        },
+        {
+          "num": 16,
+          "statement": "The Eton uniform is sold only in one shop on the territory of the college.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u041e\u043f\u0438\u0441\u0430\u043d\u0430 \u0441\u0430\u043c\u0430 \u0444\u043e\u0440\u043c\u0430, \u043d\u043e \u0433\u0434\u0435 \u0435\u0451 \u043f\u043e\u043a\u0443\u043f\u0430\u044e\u0442 \u2014 \u043d\u0435 \u0443\u043f\u043e\u043c\u0438\u043d\u0430\u0435\u0442\u0441\u044f."
+        },
+        {
+          "num": 17,
+          "statement": "Many famous people have taken part in the work of the student societies.",
+          "answer": 1,
+          "evidence": "Among past guest speakers were composer Andrew Lloyd Webber, writer J. K. Rowling, designer Vivienne Westwood, and actor Ralph Fiennes.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0421\u0440\u0435\u0434\u0438 \u0433\u043e\u0441\u0442\u0435\u0439 \u043e\u0431\u0449\u0435\u0441\u0442\u0432 \u0431\u044b\u043b\u0438 \u042d\u043d\u0434\u0440\u044e \u041b\u043b\u043e\u0439\u0434 \u0423\u044d\u0431\u0431\u0435\u0440, \u0414\u0436. \u041a. \u0420\u043e\u0443\u043b\u0438\u043d\u0433, \u0420\u044d\u0439\u0444 \u0424\u0430\u0439\u043d\u0441 \u0438 \u0434\u0440\u0443\u0433\u0438\u0435."
+        },
+        {
+          "num": 18,
+          "statement": "It is easy to identify Poppers in a crowd of students due to their clothes.",
+          "answer": 1,
+          "evidence": "While all students wear black waistcoats, members of the Pop are allowed to wear any waistcoat they please.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041f\u043e\u043f\u043f\u0435\u0440\u044b \u043c\u043e\u0433\u0443\u0442 \u043d\u043e\u0441\u0438\u0442\u044c \u043b\u044e\u0431\u044b\u0435 \u0436\u0438\u043b\u0435\u0442\u044b, \u0432 \u043e\u0442\u043b\u0438\u0447\u0438\u0435 \u043e\u0442 \u043e\u0441\u0442\u0430\u043b\u044c\u043d\u044b\u0445 \u0441\u0442\u0443\u0434\u0435\u043d\u0442\u043e\u0432 \u0432 \u0447\u0451\u0440\u043d\u044b\u0445 \u2014 \u0438\u0445 \u043b\u0435\u0433\u043a\u043e \u0443\u0437\u043d\u0430\u0442\u044c."
+        },
+        {
+          "num": 19,
+          "statement": "The official colour of Eton College is white.",
+          "answer": 2,
+          "evidence": "the official colour of the college is the so-called \u2018Eton blue\u2019. It\u2019s a light blue-green colour.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041e\u0444\u0438\u0446\u0438\u0430\u043b\u044c\u043d\u044b\u0439 \u0446\u0432\u0435\u0442 \u2014 \u00abEton blue\u00bb (\u0441\u0432\u0435\u0442\u043b\u043e-\u0433\u043e\u043b\u0443\u0431\u043e\u0439 \u0441 \u0437\u0435\u043b\u0435\u043d\u043e\u0432\u0430\u0442\u044b\u043c \u043e\u0442\u0442\u0435\u043d\u043a\u043e\u043c), \u0430 \u043d\u0435 \u0431\u0435\u043b\u044b\u0439."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "slug": "potatoes",
+      "title": "Potatoes",
+      "emoji": "\ud83e\udd54",
+      "text": "The potato comes from the high and cool areas of the Andes of Peru. It began to be grown as food more than 7,000 years ago. When Europeans came to South America, they took the potato back to Europe.\n\nIn 1589, Sir Walter Raleigh, an English explorer and historian known for his expeditions to the Americas, first brought the potato to Ireland and planted the new vegetable there. In spite of the fact that the potatoes grew very well in the poor soil of Ireland, it took nearly 200 years for them to become a widely grown crop in Ireland and Great Britain. People didn\u2019t like its unusual appearance and originally bitter taste. Besides, the potato was not mentioned in the Bible and it was often associated with the devil.\n\nAccording to legend, Sir Walter Raleigh presented potato plants to Queen Elizabeth I. A special royal potato dinner was made and the noble men were invited to taste the new American vegetable. But the royal cooks didn\u2019t know how to cook potatoes: they cut off and threw away the ugly-looking tubers and brought to the royal table a dish of boiled leaves (which are very poisonous). Most of the guests died after that royal dinner and potatoes were forbidden for many years.\n\nOnly two hundred years later farmers in Great Britain and Ireland began growing potatoes. Soon the rest of Europe started to follow Britain. The only country which did not accept potatoes was France. To overcome the negative attitude of the French people towards the new vegetable, King Louis XVI started to wear a potato flower as a decoration. He tried to make the people understand the benefit of potatoes as food. Even after the French king had given an order to his citizens to grow potatoes, they still were against the unfamiliar vegetable. The farmers refused to eat potatoes because of its unusual smell and taste. Then King Louis XVI decided to trick his people. In order to show the value of the potato, the king ordered to have it planted in a royal field and put guards to watch over the field. When the local farmers saw the guards at the royal field, they decided that the thing so carefully guarded must be valuable. One day, the guards were allowed to go off duty. The local farmers went into the field, dug out some potatoes and planted them in their fields. The king\u2019s plan was a success. From this small start, the habit of growing and eating potatoes spread all over the country.\n\nAs Europeans began to grow potatoes, they realized the advantages of the new vegetable. The potato harvest was enough to feed their own families and to sell some to the citizens of towns and cities. The new food stimulated the development of cities and industries. Besides, the health of the people improved as they included potatoes in their diets. Now the potato is grown and enjoyed everywhere.",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "Potatoes were the basic food for the people of Peru.",
+          "answer": 3,
+          "evidence": "The potato comes from the high and cool areas of the Andes of Peru. It began to be grown as food more than 7,000 years ago.",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0413\u043e\u0432\u043e\u0440\u0438\u0442\u0441\u044f, \u0447\u0442\u043e \u043a\u0430\u0440\u0442\u043e\u0444\u0435\u043b\u044c \u0440\u043e\u0434\u043e\u043c \u0438\u0437 \u041f\u0435\u0440\u0443, \u043d\u043e \u0431\u044b\u043b \u043b\u0438 \u043e\u043d \u043e\u0441\u043d\u043e\u0432\u043d\u043e\u0439 \u0435\u0434\u043e\u0439 (basic food) \u2014 \u043d\u0435 \u0443\u043a\u0430\u0437\u0430\u043d\u043e."
+        },
+        {
+          "num": 14,
+          "statement": "The British people liked potatoes at once.",
+          "answer": 2,
+          "evidence": "it took nearly 200 years for them to become a widely grown crop in Ireland and Great Britain. People didn\u2019t like its unusual appearance and originally bitter taste.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0411\u0440\u0438\u0442\u0430\u043d\u0446\u0430\u043c \u043f\u043e\u043d\u0430\u0434\u043e\u0431\u0438\u043b\u043e\u0441\u044c 200 \u043b\u0435\u0442, \u0447\u0442\u043e\u0431\u044b \u043f\u0440\u0438\u043d\u044f\u0442\u044c \u043a\u0430\u0440\u0442\u043e\u0444\u0435\u043b\u044c. \u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u043e\u043d \u0438\u043c \u043d\u0435 \u043d\u0440\u0430\u0432\u0438\u043b\u0441\u044f."
+        },
+        {
+          "num": 15,
+          "statement": "The potato dish for the royal dinner was prepared in a wrong way.",
+          "answer": 1,
+          "evidence": "the royal cooks didn\u2019t know how to cook potatoes: they cut off and threw away the ugly-looking tubers and brought to the royal table a dish of boiled leaves (which are very poisonous).",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041f\u043e\u0432\u0430\u0440\u0430 \u0432\u044b\u0431\u0440\u043e\u0441\u0438\u043b\u0438 \u043a\u043b\u0443\u0431\u043d\u0438 \u0438 \u0441\u0432\u0430\u0440\u0438\u043b\u0438 \u044f\u0434\u043e\u0432\u0438\u0442\u044b\u0435 \u043b\u0438\u0441\u0442\u044c\u044f \u2014 \u0431\u043b\u044e\u0434\u043e \u0431\u044b\u043b\u043e \u043f\u0440\u0438\u0433\u043e\u0442\u043e\u0432\u043b\u0435\u043d\u043e \u043d\u0435\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e."
+        },
+        {
+          "num": 16,
+          "statement": "King Louis XVI was against the idea of growing potatoes for food.",
+          "answer": 2,
+          "evidence": "He tried to make the people understand the benefit of potatoes as food.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041a\u043e\u0440\u043e\u043b\u044c \u041b\u044e\u0434\u043e\u0432\u0438\u043a XVI, \u043d\u0430\u043e\u0431\u043e\u0440\u043e\u0442, \u043f\u0440\u043e\u0434\u0432\u0438\u0433\u0430\u043b \u043a\u0430\u0440\u0442\u043e\u0444\u0435\u043b\u044c \u2014 \u043d\u043e\u0441\u0438\u043b \u0446\u0432\u0435\u0442\u043e\u043a \u043a\u0430\u0440\u0442\u043e\u0444\u0435\u043b\u044f, \u043f\u0440\u0438\u043a\u0430\u0437\u0430\u043b \u0435\u0433\u043e \u0432\u044b\u0440\u0430\u0449\u0438\u0432\u0430\u0442\u044c, \u043f\u0440\u0438\u0434\u0443\u043c\u0430\u043b \u0445\u0438\u0442\u0440\u043e\u0441\u0442\u044c \u0441 \u043e\u0445\u0440\u0430\u043d\u043e\u0439."
+        },
+        {
+          "num": 17,
+          "statement": "French farmers stole some potatoes from the King\u2019s field.",
+          "answer": 1,
+          "evidence": "The local farmers went into the field, dug out some potatoes and planted them in their fields.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0424\u0435\u0440\u043c\u0435\u0440\u044b \u043f\u0440\u043e\u0431\u0440\u0430\u043b\u0438\u0441\u044c \u043d\u0430 \u043a\u043e\u0440\u043e\u043b\u0435\u0432\u0441\u043a\u043e\u0435 \u043f\u043e\u043b\u0435 \u0438 \u0432\u044b\u043a\u043e\u043f\u0430\u043b\u0438 \u043a\u0430\u0440\u0442\u043e\u0444\u0435\u043b\u044c (\u0438\u043c\u0435\u043d\u043d\u043e \u044d\u0442\u043e\u0433\u043e \u0438 \u0445\u043e\u0442\u0435\u043b \u043a\u043e\u0440\u043e\u043b\u044c)."
+        },
+        {
+          "num": 18,
+          "statement": "The potato helped the development of the European countries.",
+          "answer": 1,
+          "evidence": "The new food stimulated the development of cities and industries.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041a\u0430\u0440\u0442\u043e\u0444\u0435\u043b\u044c \u0441\u0442\u0438\u043c\u0443\u043b\u0438\u0440\u043e\u0432\u0430\u043b \u0440\u0430\u0437\u0432\u0438\u0442\u0438\u0435 \u0433\u043e\u0440\u043e\u0434\u043e\u0432 \u0438 \u043f\u0440\u043e\u043c\u044b\u0448\u043b\u0435\u043d\u043d\u043e\u0441\u0442\u0438."
+        },
+        {
+          "num": 19,
+          "statement": "Nowadays the potato is the most popular vegetable in Europe.",
+          "answer": 3,
+          "evidence": "Now the potato is grown and enjoyed everywhere.",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u041a\u0430\u0440\u0442\u043e\u0444\u0435\u043b\u044c \u0432\u044b\u0440\u0430\u0449\u0438\u0432\u0430\u044e\u0442 \u0432\u0435\u0437\u0434\u0435, \u043d\u043e \u0447\u0442\u043e \u043e\u043d \u0441\u0430\u043c\u044b\u0439 \u043f\u043e\u043f\u0443\u043b\u044f\u0440\u043d\u044b\u0439 (the most popular) \u2014 \u043d\u0435 \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u0435\u0442\u0441\u044f."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "slug": "the-crown-jewels",
+      "title": "The Crown Jewels",
+      "emoji": "\ud83d\udc51",
+      "text": "Every year, millions of visitors come to the Tower of London to see the Crown Jewels. The Crown Jewels have been kept in the Tower since 1303 after they were stolen from Westminster Abbey. Luckily, that time most of the Crown Jewels were found shortly afterwards and put in the Tower.\n\nAlthough there have been a few attempts to steal the Crown Jewels from the Tower, none of them have succeeded. But the name of one of the thieves has remained in the British history. He was Thomas Blood. On the 9th May, 1660, Thomas Blood, dressed as a priest, came to the Tower. He came with three well-dressed young men.\n\nThomas Blood had already been to the Tower a few days earlier. He was with a woman whom he introduced as his \u2018wife\u2019. When they were walking round the Tower, the \u2018wife\u2019 pretended to feel unwell and fainted. Talbert Edwards, who was Master of the Jewel House and lived in the Jewel House with his family, took the woman upstairs to his family\u2019s rooms. He also asked his wife to help the fainted lady. In an hour or so the lady felt better and left the Tower with her \u2018husband\u2019.\n\nOn the second visit, Thomas Blood, again dressed as a priest, brought a present for Edwards\u2019 wife for her help and attention to his \u2018wife\u2019. He gained the confidence of the Master of the Jewel House, Talbert Edwards, and asked him to show the Crown Jewels to his friends. Talbert Edwards agreed and took them to the room where the Crown Jewels were kept. Suddenly Blood took out a hammer from under his priest\u2019s dress and struck the Master on the head. Talbert Edwards fell down and fainted. Thomas Blood took the king\u2019s crown and made it flat with the hammer in order to put the crown into a large pocket of his priest dress. The other three men took other royal jewels and hid them in their pockets.\n\nBy chance, Talbert Edwards\u2019 son, Wythe, arrived at the Tower earlier than expected. He found his father lying unconscious and bleeding. Wythe raised the alarm. Though Thomas Blood and his gang had left the jewel room, they were caught when they were getting out of the Tower. The broken crown and the jewels were found with them.\n\nA report was immediately sent to the king, and Charles II sent for Thomas Blood. The king wanted to talk to the thief who had committed such a wicked crime. The end of the story is unbelievable. Thomas Blood was not punished. Moreover, Blood was awarded a pension of \u00a3500 a year. At the same time the Master of the Jewel House Talbert Edwards was dismissed for his carelessness. Later, he died in misery.\n\nSince Thomas Blood\u2019s attempt in 1600 up to the present date, there have been no attempts to steal the jewels. Nowadays the priceless collection is open for the public to view and the Crown Jewels are considered to be the most well-guarded treasures in the world. They are kept in the Tower and are guarded by the Yeomen Warders, commonly known as the Beefeaters.",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "Nowadays British kings and queens use the Crown Jewels for ceremonial events.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0413\u043e\u0432\u043e\u0440\u0438\u0442\u0441\u044f, \u0447\u0442\u043e \u043a\u043e\u043b\u043b\u0435\u043a\u0446\u0438\u044e \u043c\u043e\u0436\u043d\u043e \u043e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0432 \u0422\u0430\u0443\u044d\u0440\u0435, \u043d\u043e \u043e \u0442\u043e\u043c, \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u044e\u0442 \u043b\u0438 \u0438\u0445 \u043d\u0430 \u0446\u0435\u0440\u0435\u043c\u043e\u043d\u0438\u044f\u0445 \u2014 \u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u0438 \u043d\u0435\u0442."
+        },
+        {
+          "num": 14,
+          "statement": "Thomas Blood\u2019s crime was well-planned.",
+          "answer": 1,
+          "evidence": "Thomas Blood had already been to the Tower a few days earlier... He gained the confidence of the Master of the Jewel House.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0411\u043b\u0430\u0434 \u0442\u0449\u0430\u0442\u0435\u043b\u044c\u043d\u043e \u0433\u043e\u0442\u043e\u0432\u0438\u043b\u0441\u044f: \u0441\u043d\u0430\u0447\u0430\u043b\u0430 \u043f\u0440\u0438\u0448\u0451\u043b \u0441 \u0444\u0430\u043b\u044c\u0448\u0438\u0432\u043e\u0439 \u00ab\u0436\u0435\u043d\u043e\u0439\u00bb, \u0437\u0430\u0432\u043e\u0435\u0432\u0430\u043b \u0434\u043e\u0432\u0435\u0440\u0438\u0435, \u043f\u043e\u0442\u043e\u043c \u0432\u0435\u0440\u043d\u0443\u043b\u0441\u044f \u0441 \u043f\u043e\u0434\u0430\u0440\u043a\u043e\u043c. \u042d\u0442\u043e \u044f\u0432\u043d\u043e \u0441\u043f\u043b\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u043e\u0435 \u043f\u0440\u0435\u0441\u0442\u0443\u043f\u043b\u0435\u043d\u0438\u0435."
+        },
+        {
+          "num": 15,
+          "statement": "Thomas Blood damaged the crown to take it out.",
+          "answer": 1,
+          "evidence": "Thomas Blood took the king\u2019s crown and made it flat with the hammer in order to put the crown into a large pocket of his priest dress.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0411\u043b\u0430\u0434 \u0440\u0430\u0441\u043f\u043b\u044e\u0449\u0438\u043b \u043a\u043e\u0440\u043e\u043d\u0443 \u043c\u043e\u043b\u043e\u0442\u043a\u043e\u043c, \u0447\u0442\u043e\u0431\u044b \u0437\u0430\u0441\u0443\u043d\u0443\u0442\u044c \u0435\u0451 \u0432 \u043a\u0430\u0440\u043c\u0430\u043d."
+        },
+        {
+          "num": 16,
+          "statement": "The criminals were found the next day after the robbery.",
+          "answer": 2,
+          "evidence": "they were caught when they were getting out of the Tower.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0418\u0445 \u043f\u043e\u0439\u043c\u0430\u043b\u0438 \u0432 \u0442\u043e\u0442 \u0436\u0435 \u0434\u0435\u043d\u044c, \u043a\u043e\u0433\u0434\u0430 \u043e\u043d\u0438 \u0432\u044b\u0445\u043e\u0434\u0438\u043b\u0438 \u0438\u0437 \u0422\u0430\u0443\u044d\u0440\u0430, \u0430 \u043d\u0435 \u043d\u0430 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0439 \u0434\u0435\u043d\u044c."
+        },
+        {
+          "num": 17,
+          "statement": "King Charles II punished Thomas Blood severely.",
+          "answer": 2,
+          "evidence": "Thomas Blood was not punished. Moreover, Blood was awarded a pension of \u00a3500 a year.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041a\u043e\u0440\u043e\u043b\u044c \u043d\u0435 \u043d\u0430\u043a\u0430\u0437\u0430\u043b \u0411\u043b\u0430\u0434\u0430, \u0430 \u043d\u0430\u043e\u0431\u043e\u0440\u043e\u0442 \u2014 \u043d\u0430\u0437\u043d\u0430\u0447\u0438\u043b \u0435\u043c\u0443 \u043f\u0435\u043d\u0441\u0438\u044e \u0432 500 \u0444\u0443\u043d\u0442\u043e\u0432!"
+        },
+        {
+          "num": 18,
+          "statement": "Thomas Blood promised King Charles II to stop stealing forever.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u041a\u043e\u0440\u043e\u043b\u044c \u0445\u043e\u0442\u0435\u043b \u043f\u043e\u0433\u043e\u0432\u043e\u0440\u0438\u0442\u044c \u0441 \u0411\u043b\u0430\u0434\u043e\u043c, \u043d\u043e \u043e \u043a\u0430\u043a\u0438\u0445-\u043b\u0438\u0431\u043e \u043e\u0431\u0435\u0449\u0430\u043d\u0438\u044f\u0445 \u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u0438 \u043d\u0435\u0442."
+        },
+        {
+          "num": 19,
+          "statement": "After Thomas Blood, other criminals tried to steal the Crown Jewels.",
+          "answer": 2,
+          "evidence": "Since Thomas Blood\u2019s attempt... there have been no attempts to steal the jewels.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041f\u043e\u0441\u043b\u0435 \u043f\u043e\u043f\u044b\u0442\u043a\u0438 \u0411\u043b\u0430\u0434\u0430 \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0438\u043a\u0442\u043e \u043d\u0435 \u043f\u044b\u0442\u0430\u043b\u0441\u044f \u0443\u043a\u0440\u0430\u0441\u0442\u044c \u043a\u043e\u0440\u043e\u043d\u043d\u044b\u0435 \u0434\u0440\u0430\u0433\u043e\u0446\u0435\u043d\u043d\u043e\u0441\u0442\u0438."
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "slug": "david-beckham",
+      "title": "David Beckham",
+      "emoji": "\u26bd",
+      "text": "David Beckham \u2013 is there a more famous and lovable celebrity? The footballer who played for such famous teams as Manchester United and Real Madrid is also a fashion model and a successful businessman.\n\nDavid Beckham was born on May 2, 1975, in London, England. His father Ted Beckham was a kitchen fitter and his mother Sandra, a hair stylist. David Beckham was the family\u2019s only son. A middle child between two sisters, David grew up with parents and relatives who were great fans of Manchester United, England\u2019s legendary football club. From childhood, David was a promising footballer. At 11 he won the prestigious Bobby Charlton Soccer Schools National Skills Competition. David was noticed by Manchester United team officials, who asked him to try out for the club\u2019s youth league. By the age of 16, Beckham had to drop out of school. He left home to play for his favourite team. Two years later he became a full-time player for Manchester United and one of its leading figures.\n\nFrom 1992 to 2003, playing for Manchester United, David Beckham scored 85 goals. Every time he had a game, he wore different football boots \u2013 it was a sort of ritual for good luck. In 2003, David unexpectedly left his beloved team for Real Madrid. The reason was the growing conflict between David Beckham and Manchester\u2019s manager, Sir Alex Ferguson. Once Sir Alex Ferguson fined David for babysitting with his sick child, while his wife Victoria, a designer, was at a London Fashion Week Event. The fine was really large. The incident caused a serious personal tension between the two men and ended in Beckham moving to the other club.\n\nIn Real Madrid, David Beckham was not allowed to wear his favourite number seven, because the right to wear it was written into the contract of another player. Instead, David decided to wear a shirt with number 23, which was the number of his favourite basketball player Michael Jordan. Though David Beckham immediately became very popular with the Real Madrid fans and his shirt sales made a lot of money for the football club, the team didn\u2019t win any serious tournaments. Perhaps, it was one of the reasons why in 2007 Beckham signed a five-year contract to play for the Los Angeles Galaxy and moved to America. However, his career in America was a rocky one \u2013 numerous injuries affected him. In May 2013, David Beckham announced his plans to retire.\n\nIt\u2019s important to say that David Beckham has always been a devoted husband and a loving father. David and his wife Victoria have three sons and a daughter. They say the boys are being trained as \u2018bodyguards\u2019 for their little sister Harper. The youngest, Cruz, has been practicing Taekwondo, Brooklyn is interested in boxing, and the oldest, Romeo, does karate. They are preparing early so that when Harper is older, \u201cthey will all be ready to protect her from noisy fans,\u201d David says.",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "David Beckham\u2019s parents were professional sportsmen.",
+          "answer": 2,
+          "evidence": "His father Ted Beckham was a kitchen fitter and his mother Sandra, a hair stylist.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041e\u0442\u0435\u0446 \u0431\u044b\u043b \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0449\u0438\u043a\u043e\u043c \u043a\u0443\u0445\u043e\u043d\u044c, \u043c\u0430\u043c\u0430 \u2014 \u043f\u0430\u0440\u0438\u043a\u043c\u0430\u0445\u0435\u0440\u043e\u043c. \u041e\u043d\u0438 \u043d\u0435 \u0431\u044b\u043b\u0438 \u043f\u0440\u043e\u0444\u0435\u0441\u0441\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u044b\u043c\u0438 \u0441\u043f\u043e\u0440\u0442\u0441\u043c\u0435\u043d\u0430\u043c\u0438."
+        },
+        {
+          "num": 14,
+          "statement": "David Beckham\u2019s school teachers supported his interest in football.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0423\u043f\u043e\u043c\u0438\u043d\u0430\u044e\u0442\u0441\u044f \u0440\u043e\u0434\u0438\u0442\u0435\u043b\u0438-\u0444\u0430\u043d\u0430\u0442\u044b \u0438 \u0442\u0440\u0435\u043d\u0435\u0440\u044b \u043a\u043b\u0443\u0431\u0430, \u043d\u043e \u043e\u0431 \u0443\u0447\u0438\u0442\u0435\u043b\u044f\u0445 \u0432 \u0448\u043a\u043e\u043b\u0435 \u043d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0433\u043e\u0432\u043e\u0440\u0438\u0442\u0441\u044f."
+        },
+        {
+          "num": 15,
+          "statement": "When he was with Manchester United, David Beckham played all the games in the same lucky boots.",
+          "answer": 2,
+          "evidence": "Every time he had a game, he wore different football boots \u2013 it was a sort of ritual for good luck.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041e\u043d \u043d\u043e\u0441\u0438\u043b \u0440\u0430\u0437\u043d\u044b\u0435 \u0431\u0443\u0442\u0441\u044b \u043d\u0430 \u043a\u0430\u0436\u0434\u044b\u0439 \u043c\u0430\u0442\u0447 (different boots), \u0430 \u043d\u0435 \u043e\u0434\u043d\u0438 \u0438 \u0442\u0435 \u0436\u0435 (the same)."
+        },
+        {
+          "num": 16,
+          "statement": "David Beckham left Manchester United because he had problems with the team manager.",
+          "answer": 1,
+          "evidence": "The reason was the growing conflict between David Beckham and Manchester\u2019s manager, Sir Alex Ferguson.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041f\u0440\u0438\u0447\u0438\u043d\u0430 \u0443\u0445\u043e\u0434\u0430 \u2014 \u043a\u043e\u043d\u0444\u043b\u0438\u043a\u0442 \u0441 \u043c\u0435\u043d\u0435\u0434\u0436\u0435\u0440\u043e\u043c \u0410\u043b\u0435\u043a\u0441\u043e\u043c \u0424\u0435\u0440\u0433\u044e\u0441\u043e\u043d\u043e\u043c."
+        },
+        {
+          "num": 17,
+          "statement": "David Beckham wore the same number in Manchester United and Real Madrid.",
+          "answer": 2,
+          "evidence": "David Beckham was not allowed to wear his favourite number seven... David decided to wear a shirt with number 23.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0412 \u041c\u0430\u043d\u0447\u0435\u0441\u0442\u0435\u0440\u0435 \u043e\u043d \u0438\u0433\u0440\u0430\u043b \u043f\u043e\u0434 \u043d\u043e\u043c\u0435\u0440\u043e\u043c 7, \u0432 \u0420\u0435\u0430\u043b\u0435 \u2014 \u043f\u043e\u0434 23."
+        },
+        {
+          "num": 18,
+          "statement": "David Beckham left Real Madrid for an American football club.",
+          "answer": 1,
+          "evidence": "in 2007 Beckham signed a five-year contract to play for the Los Angeles Galaxy and moved to America.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0411\u0435\u043a\u0445\u044d\u043c \u043f\u0435\u0440\u0435\u0448\u0451\u043b \u0432 \u0430\u043c\u0435\u0440\u0438\u043a\u0430\u043d\u0441\u043a\u0438\u0439 \u043a\u043b\u0443\u0431 Los Angeles Galaxy."
+        },
+        {
+          "num": 19,
+          "statement": "The Beckhams\u2019 sons want to become professional sportsmen.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0421\u044b\u043d\u043e\u0432\u044c\u044f \u0437\u0430\u043d\u0438\u043c\u0430\u044e\u0442\u0441\u044f \u0435\u0434\u0438\u043d\u043e\u0431\u043e\u0440\u0441\u0442\u0432\u0430\u043c\u0438, \u043d\u043e \u044d\u0442\u043e \u0434\u043b\u044f \u0437\u0430\u0449\u0438\u0442\u044b \u0441\u0435\u0441\u0442\u0440\u044b. \u041e \u043f\u0440\u043e\u0444\u0435\u0441\u0441\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u043e\u043c \u0441\u043f\u043e\u0440\u0442\u0435 \u043d\u0435 \u0433\u043e\u0432\u043e\u0440\u0438\u0442\u0441\u044f."
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "slug": "florence-nightingale",
+      "title": "Florence Nightingale",
+      "emoji": "\ud83c\udf9f\ufe0f",
+      "text": "Florence Nightingale was a celebrated English nurse and writer. According to a survey, British people consider her to be one of the most famous British persons along with outstanding scientists, writers and politicians.\n\nShe was born into a rich, upper-class family in 1820, in Italy. She got her name Florence after the city of her birth, as there was a tradition in her family to name the children in honour of the city they were born in. She got an all-round education and according to the family\u2019s status Florence was expected to become a faithful wife and attentive mother. However, in 1844 Florence decided to become a nurse, despite the intense anger and distress of her mother and sister. At that time nursing was seen as a job that needed neither education nor special medical skills.\n\nIn 1854 the Crimean War broke out and Florence Nightingale offered her services to the War Office and soon left for the Crimea with thirty-eight volunteer nurses. They began their work in the main British camp, in the hospital. Very soon Florence found out that hygiene was neglected, and fatal infections were common. There was no equipment to cook proper food for the patients. Florence decided to change the situation.\n\nNightingale managed to found a vast kitchen and a laundry. In addition to her nursing work, she tried to organize reading and recreation rooms for the wounded soldiers. She was on her feet for twenty hours a day and so were the other nurses. Florence was called \u2018The Lady with the Lamp\u2019 for her habit of making rounds round the hospital at night. She checked on her helpless patients.\n\nFlorence remained in the Crimea until 1856, then she returned to England. In London Florence Nightingale visited Queen Victoria and persuaded the Queen of the need to create a military hospital system. Soon Florence Nightingale set up a training school for nurses, the first nursing school in the world. It is now called The Florence Nightingale School of Nursing and Midwifery and is part of King\u2019s College in London. The annual International Nurses Day is celebrated around the world on Florence\u2019s birthday, the 12th of May.\n\nIn the Crimea camp, Nightingale got \u2018Crimean fever\u2019 and never fully recovered. By the time she was 38 years old, she was seriously ill. She left her house very rarely and had to stay in bed most of the time. Nevertheless, Florence continued her work from her bed. She wrote many books, some of them became the base of the curriculum at the Nightingale School and other British nursing schools.\n\nFlorence Nightingale died in London in 1910, at the age of ninety. The government offered to bury Florence in Westminster Abbey, but her relatives did not agree. However, the memorial service took place in St. Paul\u2019s Cathedral.\n\nFlorence Nightingale received a lot of honorable awards. Several books were written about the life of \u2018The Lady with the Lamp\u2019 and a few films were shot about her.",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "Florence Nightingale was named in honour of her birthplace.",
+          "answer": 1,
+          "evidence": "She got her name Florence after the city of her birth, as there was a tradition in her family to name the children in honour of the city they were born in.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0415\u0451 \u043d\u0430\u0437\u0432\u0430\u043b\u0438 \u0424\u043b\u043e\u0440\u0435\u043d\u0441 \u0432 \u0447\u0435\u0441\u0442\u044c \u0433\u043e\u0440\u043e\u0434\u0430 \u0424\u043b\u043e\u0440\u0435\u043d\u0446\u0438\u044f, \u0433\u0434\u0435 \u043e\u043d\u0430 \u0440\u043e\u0434\u0438\u043b\u0430\u0441\u044c."
+        },
+        {
+          "num": 14,
+          "statement": "Florence\u2019s family approved of her wish to become a nurse.",
+          "answer": 2,
+          "evidence": "Florence decided to become a nurse, despite the intense anger and distress of her mother and sister.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0421\u0435\u043c\u044c\u044f \u0431\u044b\u043b\u0430 \u043f\u0440\u043e\u0442\u0438\u0432 \u2014 \u043c\u0430\u0442\u044c \u0438 \u0441\u0435\u0441\u0442\u0440\u0430 \u0438\u0441\u043f\u044b\u0442\u044b\u0432\u0430\u043b\u0438 \u0433\u043d\u0435\u0432 \u0438 \u043e\u0442\u0447\u0430\u044f\u043d\u0438\u0435 (intense anger and distress)."
+        },
+        {
+          "num": 15,
+          "statement": "Florence Nightingale cooked for the wounded soldiers herself.",
+          "answer": 3,
+          "evidence": "Nightingale managed to found a vast kitchen and a laundry.",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u041e\u043d\u0430 \u043e\u0440\u0433\u0430\u043d\u0438\u0437\u043e\u0432\u0430\u043b\u0430 \u043a\u0443\u0445\u043d\u044e, \u043d\u043e \u0433\u043e\u0442\u043e\u0432\u0438\u043b\u0430 \u043b\u0438 \u043e\u043d\u0430 \u0441\u0430\u043c\u0430 \u2014 \u043d\u0435 \u0443\u043a\u0430\u0437\u0430\u043d\u043e."
+        },
+        {
+          "num": 16,
+          "statement": "Florence Nightingale got her nickname because she often visited the wounded at night.",
+          "answer": 1,
+          "evidence": "Florence was called \u2018The Lady with the Lamp\u2019 for her habit of making rounds round the hospital at night.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041f\u0440\u043e\u0437\u0432\u0438\u0449\u0435 \u00ab\u0414\u0430\u043c\u0430 \u0441 \u043b\u0430\u043c\u043f\u043e\u0439\u00bb \u043e\u043d\u0430 \u043f\u043e\u043b\u0443\u0447\u0438\u043b\u0430 \u0437\u0430 \u043d\u043e\u0447\u043d\u044b\u0435 \u043e\u0431\u0445\u043e\u0434\u044b \u0431\u043e\u043b\u044c\u043d\u0438\u0446\u044b."
+        },
+        {
+          "num": 17,
+          "statement": "Queen Victoria was impressed by Florence Nightingale\u2019s work.",
+          "answer": 3,
+          "evidence": "Florence Nightingale visited Queen Victoria and persuaded the Queen of the need to create a military hospital system.",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0424\u043b\u043e\u0440\u0435\u043d\u0441 \u0443\u0431\u0435\u0434\u0438\u043b\u0430 \u043a\u043e\u0440\u043e\u043b\u0435\u0432\u0443 \u0441\u043e\u0437\u0434\u0430\u0442\u044c \u0432\u043e\u0435\u043d\u043d\u0443\u044e \u0431\u043e\u043b\u044c\u043d\u0438\u0446\u0443, \u043d\u043e \u0441\u043b\u043e\u0432\u0430 impressed \u0432 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435\u0442 \u2014 \u043c\u044b \u043d\u0435 \u0437\u043d\u0430\u0435\u043c, \u0431\u044b\u043b\u0430 \u043b\u0438 \u043a\u043e\u0440\u043e\u043b\u0435\u0432\u0430 \u0432\u043f\u0435\u0447\u0430\u0442\u043b\u0435\u043d\u0430."
+        },
+        {
+          "num": 18,
+          "statement": "Florence Nightingale\u2019s school for nurses was closed after her death.",
+          "answer": 2,
+          "evidence": "It is now called The Florence Nightingale School of Nursing and Midwifery and is part of King\u2019s College in London.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0428\u043a\u043e\u043b\u0430 \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u0434\u043e \u0441\u0438\u0445 \u043f\u043e\u0440 (is now called...) \u0438 \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u0447\u0430\u0441\u0442\u044c\u044e King\u2019s College."
+        },
+        {
+          "num": 19,
+          "statement": "Florence Nightingale was buried in Westminster Abbey.",
+          "answer": 2,
+          "evidence": "The government offered to bury Florence in Westminster Abbey, but her relatives did not agree.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041f\u0440\u0435\u0434\u043b\u0430\u0433\u0430\u043b\u0438 \u043f\u043e\u0445\u043e\u0440\u043e\u043d\u0438\u0442\u044c \u0432 \u0412\u0435\u0441\u0442\u043c\u0438\u043d\u0441\u0442\u0435\u0440\u0441\u043a\u043e\u043c \u0430\u0431\u0431\u0430\u0442\u0441\u0442\u0432\u0435, \u043d\u043e \u0440\u043e\u0434\u0441\u0442\u0432\u0435\u043d\u043d\u0438\u043a\u0438 \u043e\u0442\u043a\u0430\u0437\u0430\u043b\u0438\u0441\u044c."
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "slug": "the-moneyless-man",
+      "title": "The Moneyless Man",
+      "emoji": "\ud83c\udf3f",
+      "text": "For most of us it seems that money makes the world go round. However, not for Mark Boyle who has turned his life into a radical experiment.\n\nMark Boyle was born in 1979 in Ireland and moved to Great Britain after getting a degree in Business. He set up his own business in Bristol. For six years Mark Boyle managed two organic food companies which made him a good profit.\n\nHowever, in 2008, he decided to give up earning money. He vowed to live without cash, credit cards, or any other form of finance. Mark Boyle began to realise that many of the world\u2019s problems are just symptoms of a deeper problem. He thought that money gave people the illusion of independence.\n\nMark sold his house and started preparing himself for his new life. He posted an advert on a website asking for a tent, a caravan (a vehicle for living or travelling) or any other type of a house. Soon an old lady gave him a caravan for free. At least he then had a roof over his head!\n\nAfter that, with his pockets empty, Mark was ready to go. He didn\u2019t even carry keys as he decided to trust the world a bit more and not lock his caravan. On November 28th (International Buy Nothing Day 2008), he became the Moneyless Man for one whole year.\n\nEverything was different from then on. Mark lived in his caravan on an organic farm where he worked as a volunteer three days a week. In return he got a piece of land to live on and grow his own vegetables. His food was cooked on a stove, and he washed in a shower made from a plastic bag hanging from a tree, and warmed by the sun.\n\nEven breakfast was different. With no morning coffee to brew, Mark had to find an alternative drink to start the day with. So he drank herbal teas, sometimes with some fresh lemon verbena that he could find near the caravan. \u201cIt\u2019s all very good for you: iron, calcium, anti-oxidants,\u201d Mark said.\n\nFood was the first thing to consider. Mark discovered that there were four ways to find it: looking for wild food, growing his own food, bartering (exchanging his grown food for something else), and using loads of waste food from shops.\n\nPublic interest in his project was divided. While a huge number of people supported him, there was criticism of him, particularly on Internet forums. \u201cPeople are either very positive about what I\u2019m doing or very negative; I think it\u2019s about 70 per cent/30 per cent. It\u2019s funny, if you don\u2019t have a massive plasma TV these days, people think you are an extremist,\u201d Mark said.\n\nPeople tend to ask Mark what he learnt from a year of a moneyless life. \u201cWhat have I learned? That friendship, not money, is real security,\u201d he answers. Mark\u2019s remarkable journey is described in his new book \u201cThe Moneyless Man\u201d, which shows in a detailed way the challenges he faced on the road to his new world.",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "Before giving up money, Mark Boyle ran a successful business.",
+          "answer": 1,
+          "evidence": "For six years Mark Boyle managed two organic food companies which made him a good profit.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0423 \u041c\u0430\u0440\u043a\u0430 \u0431\u044b\u043b\u043e \u0434\u0432\u0435 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438, \u043f\u0440\u0438\u043d\u043e\u0441\u0438\u0432\u0448\u0438\u0435 \u0445\u043e\u0440\u043e\u0448\u0443\u044e \u043f\u0440\u0438\u0431\u044b\u043b\u044c (good profit)."
+        },
+        {
+          "num": 14,
+          "statement": "Mark bought an expensive caravan for his new life.",
+          "answer": 2,
+          "evidence": "Soon an old lady gave him a caravan for free.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041a\u0430\u0440\u0430\u0432\u0430\u043d \u0435\u043c\u0443 \u043e\u0442\u0434\u0430\u043b\u0430 \u043f\u043e\u0436\u0438\u043b\u0430\u044f \u0436\u0435\u043d\u0449\u0438\u043d\u0430 \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e (for free), \u043e\u043d \u0435\u0433\u043e \u043d\u0435 \u043f\u043e\u043a\u0443\u043f\u0430\u043b."
+        },
+        {
+          "num": 15,
+          "statement": "Mark\u2019s family approved of his moneyless project.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0423\u043f\u043e\u043c\u0438\u043d\u0430\u0435\u0442\u0441\u044f \u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0435 \u043c\u043d\u0435\u043d\u0438\u0435, \u043d\u043e \u043e\u0431 \u043e\u0442\u043d\u043e\u0448\u0435\u043d\u0438\u0438 \u0441\u0435\u043c\u044c\u0438 \u043d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0433\u043e\u0432\u043e\u0440\u0438\u0442\u0441\u044f."
+        },
+        {
+          "num": 16,
+          "statement": "The only thing Mark couldn\u2019t give up was coffee.",
+          "answer": 2,
+          "evidence": "With no morning coffee to brew, Mark had to find an alternative drink to start the day with. So he drank herbal teas.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041c\u0430\u0440\u043a \u043e\u0442\u043a\u0430\u0437\u0430\u043b\u0441\u044f \u043e\u0442 \u043a\u043e\u0444\u0435 \u0438 \u043d\u0430\u0448\u0451\u043b \u0437\u0430\u043c\u0435\u043d\u0443 \u2014 \u0442\u0440\u0430\u0432\u044f\u043d\u044b\u0435 \u0447\u0430\u0438. \u041e\u043d \u043e\u0442\u043a\u0430\u0437\u0430\u043b\u0441\u044f \u043e\u0442 \u0432\u0441\u0435\u0433\u043e, \u0432\u043a\u043b\u044e\u0447\u0430\u044f \u043a\u043e\u0444\u0435."
+        },
+        {
+          "num": 17,
+          "statement": "Mark got food from different sources.",
+          "answer": 1,
+          "evidence": "Mark discovered that there were four ways to find it: looking for wild food, growing his own food, bartering... and using loads of waste food from shops.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041c\u0430\u0440\u043a \u043d\u0430\u0448\u0451\u043b 4 \u0441\u043f\u043e\u0441\u043e\u0431\u0430 \u0434\u043e\u0431\u044b\u0447\u0438 \u0435\u0434\u044b: \u0434\u0438\u043a\u043e\u0440\u043e\u0441\u044b, \u043e\u0433\u043e\u0440\u043e\u0434, \u043e\u0431\u043c\u0435\u043d, \u043e\u0442\u0445\u043e\u0434\u044b \u043c\u0430\u0433\u0430\u0437\u0438\u043d\u043e\u0432."
+        },
+        {
+          "num": 18,
+          "statement": "People\u2019s opinions towards Mark\u2019s project were different.",
+          "answer": 1,
+          "evidence": "Public interest in his project was divided... People are either very positive about what I\u2019m doing or very negative.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041c\u043d\u0435\u043d\u0438\u044f \u0440\u0430\u0437\u0434\u0435\u043b\u0438\u043b\u0438\u0441\u044c: 70% \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u043b\u0438, 30% \u043a\u0440\u0438\u0442\u0438\u043a\u043e\u0432\u0430\u043b\u0438."
+        },
+        {
+          "num": 19,
+          "statement": "Some of Mark\u2019s fans want to repeat his experiment.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0413\u043e\u0432\u043e\u0440\u0438\u0442\u0441\u044f \u043e \u0440\u0430\u0437\u043d\u044b\u0445 \u043c\u043d\u0435\u043d\u0438\u044f\u0445, \u043d\u043e \u043e \u0436\u0435\u043b\u0430\u043d\u0438\u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u044c \u0435\u0433\u043e \u043e\u043f\u044b\u0442 \u2014 \u043d\u0438 \u0441\u043b\u043e\u0432\u0430."
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "slug": "jeans",
+      "title": "Jeans",
+      "emoji": "\ud83d\udc56",
+      "text": "The history of jeans goes as far back as the 16th century when sailors in Genoa (Italy) wore a material that eventually became the material used in jeans. The word \u2018jean\u2019 derives from the name of the Italian port city Genoa, as it was a custom to name a material after its place of origin. By the late 16th century, jean material was already produced in Lancashire, England.\n\nIt was the California Gold Rush of 1849 that started the evolution of American trousers that would one day become blue jeans. The gold miners wanted clothes that were strong and did not tear easily. The person who suggested an appropriate type of clothing was a German businessman Levi Strauss, who had moved to America. Levi Strauss sold many different things, but his main product was a tough canvas material used for tents and wagon covers. Understanding the urgent need of the gold miners Levi Strauss decided to make trousers out of the tough canvas he was selling. The miners liked the new \u2018working\u2019 trousers, though they were uncomfortable to wear as the material was too rough.\n\nTo improve the trousers for miners, Levi Strauss began looking for a different material and soon he found a suitable one in France. The material was called \u2018serge de Nimes\u2019. Americans just called it \u2018de Nimes\u2019, and this name soon became its short form \u2018denim\u2019. Denim was a bit lighter and softer than the material Levi Strauss used for his working trousers. It was very strong and did not wear out quickly, even after many washes. The trousers made of denim became quite popular among the miners.\n\nThe only problem was that original denim was almost white and the trousers got dirty as soon as the miners started working! For that reason Levi Strauss decided to use coloured denim, and he chose dark blue. This was a radical new idea and \u2018Blue jeans\u2019 had arrived!\n\nLevi\u2019s jeans were so popular, that his company got bigger and bigger. Other firms were making blue jeans too. Miners liked them, but so did cowboys and other working men.\n\nLevi\u2019s jeans were work trousers. Male workers wore them all the time but a gentleman would not even think of wearing jeans. Things changed when western movies became popular. All the cowboys wore jeans and people thought they looked heroic, attractive and cool. Also jeans were greatly popularized in Europe by American off-duty soldiers who wore them during World War II. They made jeans seem like casual American trousers, a symbol of the American lifestyle.\n\nIn the 2000s, the sale of classic blue jeans stopped growing. Young people were not particularly interested in traditional jeans styles, mainly because of their parents, who adored jeans. Since no teenager would wear the clothes their parents were wearing, the latest generation of youth turned to other fabrics and styles. They still wear denim, but it had to be in new cuts, shapes and styles.",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "Jeans cloth was named after a city.",
+          "answer": 1,
+          "evidence": "The word \u2018jean\u2019 derives from the name of the Italian port city Genoa.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0421\u043b\u043e\u0432\u043e \u00abjean\u00bb \u043f\u0440\u043e\u0438\u0441\u0445\u043e\u0434\u0438\u0442 \u043e\u0442 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u044f \u0433\u043e\u0440\u043e\u0434\u0430 \u0413\u0435\u043d\u0443\u044f (Genoa)."
+        },
+        {
+          "num": 14,
+          "statement": "Levi Strauss had a few friends among gold miners.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0421\u0442\u0440\u0430\u0443\u0441\u0441 \u043f\u0440\u043e\u0434\u0430\u0432\u0430\u043b \u0442\u043e\u0432\u0430\u0440\u044b \u0448\u0430\u0445\u0442\u0451\u0440\u0430\u043c, \u043d\u043e \u043e \u0434\u0440\u0443\u0436\u0431\u0435 \u0441 \u043d\u0438\u043c\u0438 \u043d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0433\u043e\u0432\u043e\u0440\u0438\u0442\u0441\u044f."
+        },
+        {
+          "num": 15,
+          "statement": "Levi Strauss began to make trousers for miners from the material which was used for tents.",
+          "answer": 1,
+          "evidence": "his main product was a tough canvas material used for tents and wagon covers. Understanding the urgent need of the gold miners Levi Strauss decided to make trousers out of the tough canvas he was selling.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041f\u0435\u0440\u0432\u044b\u0435 \u0431\u0440\u044e\u043a\u0438 \u0431\u044b\u043b\u0438 \u0441\u0448\u0438\u0442\u044b \u0438\u0437 \u043f\u0430\u0440\u0443\u0441\u0438\u043d\u044b \u0434\u043b\u044f \u043f\u0430\u043b\u0430\u0442\u043e\u043a (canvas for tents)."
+        },
+        {
+          "num": 16,
+          "statement": "Levi Strauss found denim in a local American shop.",
+          "answer": 2,
+          "evidence": "soon he found a suitable one in France. The material was called \u2018serge de Nimes\u2019.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0414\u0435\u043d\u0438\u043c \u043e\u043d \u043d\u0430\u0448\u0451\u043b \u0432\u043e \u0424\u0440\u0430\u043d\u0446\u0438\u0438 (in France), \u0430 \u043d\u0435 \u0432 \u0430\u043c\u0435\u0440\u0438\u043a\u0430\u043d\u0441\u043a\u043e\u043c \u043c\u0430\u0433\u0430\u0437\u0438\u043d\u0435."
+        },
+        {
+          "num": 17,
+          "statement": "The original colour of denim was blue.",
+          "answer": 2,
+          "evidence": "original denim was almost white and the trousers got dirty as soon as the miners started working!",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041f\u0435\u0440\u0432\u043e\u043d\u0430\u0447\u0430\u043b\u044c\u043d\u043e \u0434\u0435\u043d\u0438\u043c \u0431\u044b\u043b \u043f\u043e\u0447\u0442\u0438 \u0431\u0435\u043b\u044b\u043c (almost white). \u0421\u0438\u043d\u0438\u0439 \u0446\u0432\u0435\u0442 \u0421\u0442\u0440\u0430\u0443\u0441\u0441 \u0432\u044b\u0431\u0440\u0430\u043b \u043f\u043e\u0437\u0436\u0435."
+        },
+        {
+          "num": 18,
+          "statement": "After World War II jeans became popular with Europeans.",
+          "answer": 1,
+          "evidence": "jeans were greatly popularized in Europe by American off-duty soldiers who wore them during World War II.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u0410\u043c\u0435\u0440\u0438\u043a\u0430\u043d\u0441\u043a\u0438\u0435 \u0441\u043e\u043b\u0434\u0430\u0442\u044b \u043f\u043e\u043f\u0443\u043b\u044f\u0440\u0438\u0437\u0438\u0440\u043e\u0432\u0430\u043b\u0438 \u0434\u0436\u0438\u043d\u0441\u044b \u0432 \u0415\u0432\u0440\u043e\u043f\u0435 \u0432\u043e \u0432\u0440\u0435\u043c\u044f \u0412\u0442\u043e\u0440\u043e\u0439 \u043c\u0438\u0440\u043e\u0432\u043e\u0439 \u0432\u043e\u0439\u043d\u044b."
+        },
+        {
+          "num": 19,
+          "statement": "Nowadays more jeans are produced in Europe than in the USA.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u041e \u0441\u0440\u0430\u0432\u043d\u0435\u043d\u0438\u0438 \u043e\u0431\u044a\u0451\u043c\u043e\u0432 \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0441\u0442\u0432\u0430 \u0432 \u0415\u0432\u0440\u043e\u043f\u0435 \u0438 \u0421\u0428\u0410 \u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u0438 \u043d\u0435\u0442."
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "slug": "mark-twain",
+      "title": "Mark Twain",
+      "emoji": "\ud83d\udcda",
+      "text": "Mark Twain wrote \u2018The Adventures of Huckleberry Finn\u2019 in 1884. Since then, the book has been published in at least sixty languages, and some people say it is the best book ever created by an American writer. American students have \u2018The Adventures of Huckleberry Finn\u2019 on their school reading list and parents, teachers and literary experts still debate the problems touched in the book.\n\nThe writer\u2019s real name was Samuel Clemens. Samuel was born in 1835. He grew up in the state of Missouri on the Mississippi River. After his father died, young Samuel went to work as an assistant to a publisher. Ten years later, he became a pilot on a steamboat that sailed on the Mississippi. He heard the riverboat workers call out the words \u201cmark twain!\u201d That was a measure for the depth of water. Later he used this word combination as a pen-name.\n\nIn 1861 Clemens travelled west and became a reporter for newspapers in Nevada and California. He wrote news stories, editorials and sketches under his pen-name Mark Twain. He became one of the best known storytellers in the West. He developed his own narrative style \u2013 friendly, funny, and often satirical, which won him a wide audience. The first success came with the story \u2018The Celebrated Jumping Frog of Calaveras County\u2019.\n\nMark Twain travelled a lot during his lifetime not only round the USA but also to Europe and the Holy Land. He naturally began writing books about his travels. \u2018The Adventures of Tom Sawyer\u2019 was published in 1876, and soon after he began writing a sequel, \u2018The Adventures of Huckleberry Finn\u2019.\n\nIt took Mark Twain longer to write \u2018The Adventures of Huckleberry Finn\u2019 than any of his other books. He started writing in 1876, but put the story away after about two years of work. He returned to it in 1883, and the following year it was published.\n\nFrom the beginning, the book was strongly debated. Some critics praised its realism and honesty, but the others strongly disliked it. They protested against the personality of Huck \u2013 a rough, dirty and disobedient boy. They could not agree that such a person should be the main character of a book. What\u2019s more, critics disliked the way Mark Twain used the language of a common, uneducated person to tell the story; no writer had ever done that before.\n\nToday there is no longer any debate about the importance of \u2018The Adventures of Huckleberry Finn\u2019 in American literature. In 1935 Ernest Hemingway wrote: \u201cAll modern American literature comes from one book by Mark Twain called \u2018Huckleberry Finn.\u2019 There was nothing before. And there has been nothing as good since.\u201d\n\nNo wonder then that the novel \u2018The Adventures of Huckleberry Finn\u2019 was a great inspiration for film producers \u2013 more than 20 screen versions of the book have been shot not only in America, but also in Europe, Russia and Japan. There are feature films, musicals, cartoons and even Japanese anime.",
+      "questions": [
+        {
+          "num": 13,
+          "statement": "\u2018The Adventures of Huckleberry Finn\u2019 has been translated into many languages.",
+          "answer": 1,
+          "evidence": "the book has been published in at least sixty languages.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041a\u043d\u0438\u0433\u0430 \u0438\u0437\u0434\u0430\u043d\u0430 \u043c\u0438\u043d\u0438\u043c\u0443\u043c \u043d\u0430 60 \u044f\u0437\u044b\u043a\u0430\u0445 \u2014 \u044d\u0442\u043e \u043c\u043d\u043e\u0433\u043e."
+        },
+        {
+          "num": 14,
+          "statement": "The writer took his pen-name when working as an assistant to a publisher.",
+          "answer": 2,
+          "evidence": "he became a pilot on a steamboat... He heard the riverboat workers call out the words \u201cmark twain!\u201d... Later he used this word combination as a pen-name.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041f\u0441\u0435\u0432\u0434\u043e\u043d\u0438\u043c \u043f\u043e\u044f\u0432\u0438\u043b\u0441\u044f, \u043a\u043e\u0433\u0434\u0430 \u043e\u043d \u0440\u0430\u0431\u043e\u0442\u0430\u043b \u043b\u043e\u0446\u043c\u0430\u043d\u043e\u043c \u043d\u0430 \u043f\u0430\u0440\u043e\u0445\u043e\u0434\u0435, \u0430 \u043d\u0435 \u043f\u043e\u043c\u043e\u0449\u043d\u0438\u043a\u043e\u043c \u0438\u0437\u0434\u0430\u0442\u0435\u043b\u044f."
+        },
+        {
+          "num": 15,
+          "statement": "\u2018The Celebrated Jumping Frog of Calaveras County\u2019 is still on the reading list for American school children.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0412 \u0448\u043a\u043e\u043b\u044c\u043d\u043e\u043c \u0441\u043f\u0438\u0441\u043a\u0435 \u0443\u043f\u043e\u043c\u0438\u043d\u0430\u0435\u0442\u0441\u044f \u0442\u043e\u043b\u044c\u043a\u043e \u00ab\u0413\u0435\u043a\u043b\u044c\u0431\u0435\u0440\u0440\u0438 \u0424\u0438\u043d\u043d\u00bb, \u0430 \u043f\u0440\u043e \u00ab\u041b\u044f\u0433\u0443\u0448\u043a\u0443\u00bb \u0442\u0430\u043a\u043e\u0439 \u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u0438 \u043d\u0435\u0442."
+        },
+        {
+          "num": 16,
+          "statement": "It took Mark Twain two years to write \u2018The Adventures of Huckleberry Finn\u2019.",
+          "answer": 2,
+          "evidence": "He started writing in 1876, but put the story away after about two years of work. He returned to it in 1883, and the following year it was published.",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u041e\u043d \u043d\u0430\u0447\u0430\u043b \u0432 1876, \u0431\u0440\u043e\u0441\u0438\u043b \u0447\u0435\u0440\u0435\u0437 2 \u0433\u043e\u0434\u0430, \u0432\u0435\u0440\u043d\u0443\u043b\u0441\u044f \u0432 1883, \u0438\u0437\u0434\u0430\u043b \u0432 1884. \u0412 \u0441\u0443\u043c\u043c\u0435 \u044d\u0442\u043e \u043e\u043a\u043e\u043b\u043e 8 \u043b\u0435\u0442, \u0430 \u043d\u0435 \u0434\u0432\u0430."
+        },
+        {
+          "num": 17,
+          "statement": "Literary critics expressed different opinions of \u2018The Adventures of Huckleberry Finn\u2019.",
+          "answer": 1,
+          "evidence": "Some critics praised its realism and honesty, but the others strongly disliked it.",
+          "explanation": "\u0412\u0435\u0440\u043d\u043e. \u041c\u043d\u0435\u043d\u0438\u044f \u0440\u0430\u0437\u0434\u0435\u043b\u0438\u043b\u0438\u0441\u044c: \u043e\u0434\u043d\u0438 \u0445\u0432\u0430\u043b\u0438\u043b\u0438, \u0434\u0440\u0443\u0433\u0438\u0435 \u0440\u0435\u0437\u043a\u043e \u043a\u0440\u0438\u0442\u0438\u043a\u043e\u0432\u0430\u043b\u0438."
+        },
+        {
+          "num": 18,
+          "statement": "Ernest Hemingway strongly criticised \u2018The Adventures of Huckleberry Finn\u2019.",
+          "answer": 2,
+          "evidence": "Ernest Hemingway wrote: \u201cAll modern American literature comes from one book by Mark Twain called \u2018Huckleberry Finn.\u2019 There was nothing before. And there has been nothing as good since.\u201d",
+          "explanation": "\u041d\u0435\u0432\u0435\u0440\u043d\u043e. \u0425\u0435\u043c\u0438\u043d\u0433\u0443\u044d\u0439 \u0432\u044b\u0441\u043e\u043a\u043e \u043e\u0446\u0435\u043d\u0438\u043b \u043a\u043d\u0438\u0433\u0443, \u043d\u0430\u0437\u0432\u0430\u0432 \u0435\u0451 \u0438\u0441\u0442\u043e\u043a\u043e\u043c \u0432\u0441\u0435\u0439 \u0441\u043e\u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e\u0439 \u0430\u043c\u0435\u0440\u0438\u043a\u0430\u043d\u0441\u043a\u043e\u0439 \u043b\u0438\u0442\u0435\u0440\u0430\u0442\u0443\u0440\u044b. \u042d\u0442\u043e \u043f\u043e\u0445\u0432\u0430\u043b\u0430, \u0430 \u043d\u0435 \u043a\u0440\u0438\u0442\u0438\u043a\u0430."
+        },
+        {
+          "num": 19,
+          "statement": "The first film on the novel \u2018The Adventures of Huckleberry Finn\u2019 was shot in Europe.",
+          "answer": 3,
+          "evidence": "",
+          "explanation": "\u0412 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e. \u0424\u0438\u043b\u044c\u043c\u044b \u0441\u043d\u0438\u043c\u0430\u043b\u0438\u0441\u044c \u0432 \u0410\u043c\u0435\u0440\u0438\u043a\u0435, \u0415\u0432\u0440\u043e\u043f\u0435, \u0420\u043e\u0441\u0441\u0438\u0438 \u0438 \u042f\u043f\u043e\u043d\u0438\u0438, \u043d\u043e \u0433\u0434\u0435 \u0431\u044b\u043b \u0441\u043d\u044f\u0442 \u043f\u0435\u0440\u0432\u044b\u0439 \u2014 \u043d\u0435 \u0443\u043a\u0430\u0437\u0430\u043d\u043e."
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+<script>
+/* ═══════════════════════════════════════════
+   OGE READING TRAINER — ENGINE
+   ═══════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  const STORAGE_KEY = 'oge-reading-v1';
+  const ANSWER_LABELS = { 1: 'True', 2: 'False', 3: 'Not stated' };
+  const ANSWER_LABELS_RU = { 1: 'Верно', 2: 'Неверно', 3: 'Не сказано в тексте' };
+
+  /* ── Data ── */
+  const DATA = JSON.parse(document.getElementById('exam-data').textContent);
+  const app = document.getElementById('app');
+
+  /* ── State ── */
+  let state = loadState();
+
+  function defaultState() {
+    return {
+      version: 1,
+      streak: { current: 0, lastDate: null, best: 0 },
+      texts: {}
+    };
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.version === 1) return s;
+      }
+    } catch (e) {}
+    return defaultState();
+  }
+
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function getTextState(slug) {
+    return state.texts[slug] || { bestScore: 0, lastScore: -1, attempts: 0 };
+  }
+
+  function saveTextResult(slug, score, total) {
+    const ts = getTextState(slug);
+    ts.attempts = (ts.attempts || 0) + 1;
+    ts.lastScore = score;
+    if (score > (ts.bestScore || 0)) ts.bestScore = score;
+    ts.lastAttempt = new Date().toISOString();
+    state.texts[slug] = ts;
+
+    const today = new Date().toISOString().split('T')[0];
+    if (state.streak.lastDate === today) {
+      /* already counted today */
+    } else {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      if (state.streak.lastDate === yesterday) {
+        state.streak.current++;
+      } else {
+        state.streak.current = 1;
+      }
+      state.streak.lastDate = today;
+      if (state.streak.current > state.streak.best) state.streak.best = state.streak.current;
+    }
+    saveState();
+  }
+
+  /* ── Helpers ── */
+  function getMastery(score) {
+    if (score >= 7) return { level: 'diamond', label: 'Diamond', icon: '\u2728' };
+    if (score >= 6) return { level: 'gold', label: 'Gold', icon: '\u2b50' };
+    if (score >= 4) return { level: 'silver', label: 'Silver', icon: '\ud83e\udd48' };
+    if (score >= 1) return { level: 'bronze', label: 'Bronze', icon: '\ud83e\udd49' };
+    return { level: 'none', label: '', icon: '' };
+  }
+
+  function getTotalStats() {
+    let totalCorrect = 0, totalAttempted = 0;
+    DATA.texts.forEach(t => {
+      const ts = getTextState(t.slug);
+      if (ts.bestScore > 0) {
+        totalCorrect += ts.bestScore;
+        totalAttempted++;
+      }
+    });
+    return { totalCorrect, totalAttempted, total: DATA.texts.length * 7 };
+  }
+
+  function textToParagraphs(text) {
+    return text.split('\n\n').map(p => `<p>${p}</p>`).join('');
+  }
+
+  function getMessage(score, total) {
+    const pct = score / total;
+    if (pct === 1) return { title: 'Brilliant!', sub: '\u0418\u0434\u0435\u0430\u043b\u044c\u043d\u044b\u0439 \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442! \u0422\u044b \u043e\u0442\u043b\u0438\u0447\u043d\u043e \u0440\u0430\u0437\u043e\u0431\u0440\u0430\u043b\u0430\u0441\u044c \u0432 \u0442\u0435\u043a\u0441\u0442\u0435.' };
+    if (pct >= 0.85) return { title: 'Excellent!', sub: '\u041f\u043e\u0447\u0442\u0438 \u0438\u0434\u0435\u0430\u043b\u044c\u043d\u043e. \u041e\u0441\u0442\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0432\u0441\u0435\u043c \u0447\u0443\u0442\u044c-\u0447\u0443\u0442\u044c!' };
+    if (pct >= 0.7) return { title: 'Well done!', sub: '\u0425\u043e\u0440\u043e\u0448\u0438\u0439 \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439 \u0435\u0449\u0451 \u0440\u0430\u0437 \u0434\u043b\u044f \u0438\u0434\u0435\u0430\u043b\u0430!' };
+    if (pct >= 0.5) return { title: 'Good try!', sub: '\u041d\u0435\u043f\u043b\u043e\u0445\u043e! \u041f\u0435\u0440\u0435\u0447\u0438\u0442\u0430\u0439 \u0442\u0435\u043a\u0441\u0442 \u0432\u043d\u0438\u043c\u0430\u0442\u0435\u043b\u044c\u043d\u0435\u0435 \u0438 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439 \u0441\u043d\u043e\u0432\u0430.' };
+    return { title: 'Keep going!', sub: '\u041d\u0435 \u0441\u0434\u0430\u0432\u0430\u0439\u0441\u044f! \u041f\u0440\u043e\u0447\u0438\u0442\u0430\u0439 \u0442\u0435\u043a\u0441\u0442 \u0435\u0449\u0451 \u0440\u0430\u0437 \u0438 \u043e\u0431\u0440\u0430\u0442\u0438 \u0432\u043d\u0438\u043c\u0430\u043d\u0438\u0435 \u043d\u0430 \u0434\u0435\u0442\u0430\u043b\u0438.' };
+  }
+
+  /* ── Router ── */
+  function navigate(hash) {
+    location.hash = hash;
+  }
+
+  function route() {
+    const hash = location.hash || '#home';
+    const parts = hash.replace('#', '').split('/');
+    const screen = parts[0];
+    const slug = parts[1] || '';
+
+    window.scrollTo(0, 0);
+
+    switch (screen) {
+      case 'text': renderReading(slug); break;
+      case 'quiz': renderQuiz(slug); break;
+      case 'results': renderResults(slug); break;
+      case 'progress': renderProgress(); break;
+      default: renderHome();
+    }
+  }
+
+  window.addEventListener('hashchange', route);
+
+  /* ── RENDER: Home ── */
+  function renderHome() {
+    const stats = getTotalStats();
+    const pct = stats.total > 0 ? (stats.totalCorrect / stats.total * 100) : 0;
+    const streakHTML = state.streak.current > 0
+      ? `<div class="home-streak">\ud83d\udd25 ${state.streak.current}-\u0439 \u0434\u0435\u043d\u044c \u043f\u043e\u0434\u0440\u044f\u0434!</div>`
+      : '';
+
+    let cardsHTML = DATA.texts.map((t, i) => {
+      const ts = getTextState(t.slug);
+      const m = getMastery(ts.bestScore);
+      const scoreTxt = ts.bestScore > 0 ? `${ts.bestScore}/7` : '';
+      const progressPct = (ts.bestScore / 7 * 100);
+      const progressClass = ts.bestScore >= 6 ? 'progress-gold' : 'progress-green';
+      const statusText = ts.bestScore === 0 ? '\u041d\u043e\u0432\u044b\u0439' : ts.bestScore === 7 ? 'Perfect!' : `\u041b\u0443\u0447\u0448\u0438\u0439: ${ts.bestScore}/7`;
+
+      return `<div class="text-card" onclick="location.hash='#text/${t.slug}'" style="animation-delay:${i * 0.04}s">
+        <div class="text-card-emoji">${t.emoji}</div>
+        <div class="text-card-info">
+          <div class="text-card-title">${t.title}</div>
+          <div class="text-card-meta">${statusText}</div>
+        </div>
+        <div class="text-card-badge">
+          ${m.level !== 'none' ? `<div class="mastery-seal mastery-${m.level}">${m.icon}</div>` : `<div class="mastery-seal mastery-none">\u2022</div>`}
+        </div>
+        <div class="text-card-progress"><div class="text-card-progress-fill ${progressClass}" style="width:${progressPct}%"></div></div>
+      </div>`;
+    }).join('');
+
+    app.innerHTML = `
+      <header class="app-header">
+        <div class="app-header-inner">
+          <div class="header-title">OGE Reading</div>
+          <button class="header-stats" onclick="location.hash='#progress'">${stats.totalCorrect}/${stats.total}</button>
+        </div>
+      </header>
+      <div class="screen">
+        <div class="home-hero">
+          <div class="home-hero-title">Reading Trainer</div>
+          <div class="home-hero-sub">\u041f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430 \u043a \u041e\u0413\u042d \u2022 True / False / Not stated</div>
+          ${streakHTML}
+        </div>
+        <div class="home-progress-bar"><div class="home-progress-fill" style="width:${pct}%"></div></div>
+        <div class="text-list">${cardsHTML}</div>
+      </div>`;
+  }
+
+  /* ── RENDER: Reading ── */
+  function renderReading(slug) {
+    const t = DATA.texts.find(x => x.slug === slug);
+    if (!t) { navigate('#home'); return; }
+
+    app.innerHTML = `
+      <header class="app-header">
+        <div class="app-header-inner">
+          <button class="header-back" onclick="location.hash='#home'">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            \u041d\u0430\u0437\u0430\u0434
+          </button>
+          <div class="header-title">${t.title}</div>
+          <div style="width:60px"></div>
+        </div>
+      </header>
+      <div class="screen">
+        <div class="reading-header">
+          <div class="reading-emoji">${t.emoji}</div>
+          <div class="reading-title">${t.title}</div>
+        </div>
+        <div class="reading-divider"></div>
+        <div class="reading-instruction">
+          \u041f\u0440\u043e\u0447\u0438\u0442\u0430\u0439 \u0442\u0435\u043a\u0441\u0442. \u041e\u043f\u0440\u0435\u0434\u0435\u043b\u0438, \u043a\u0430\u043a\u0438\u0435 \u0438\u0437 \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u0439 <strong>13\u201319</strong> \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044e\u0442 \u0442\u0435\u043a\u0441\u0442\u0443 (<strong>True</strong>), \u043a\u0430\u043a\u0438\u0435 \u043d\u0435 \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044e\u0442 (<strong>False</strong>), \u0430 \u043e \u0447\u0451\u043c \u0432 \u0442\u0435\u043a\u0441\u0442\u0435 \u043d\u0435 \u0441\u043a\u0430\u0437\u0430\u043d\u043e (<strong>Not stated</strong>).
+        </div>
+        <div class="reading-text">${textToParagraphs(t.text)}</div>
+        <button class="start-quiz-btn" onclick="location.hash='#quiz/${t.slug}'">\u041d\u0430\u0447\u0430\u0442\u044c \u0442\u0435\u0441\u0442</button>
+      </div>`;
+  }
+
+  /* ── RENDER: Quiz ── */
+  let quizState = {};
+
+  function renderQuiz(slug) {
+    const t = DATA.texts.find(x => x.slug === slug);
+    if (!t) { navigate('#home'); return; }
+
+    if (!quizState.slug || quizState.slug !== slug) {
+      quizState = {
+        slug,
+        current: 0,
+        answers: new Array(t.questions.length).fill(null),
+        correct: new Array(t.questions.length).fill(null)
+      };
+    }
+
+    renderQuizQuestion(t);
+  }
+
+  function renderQuizQuestion(t) {
+    const qi = quizState.current;
+    const q = t.questions[qi];
+    const answered = quizState.answers[qi] !== null;
+
+    let dotsHTML = t.questions.map((_, i) => {
+      let cls = 'quiz-dot';
+      if (i === qi) cls += ' active';
+      else if (quizState.correct[i] === true) cls += ' correct';
+      else if (quizState.correct[i] === false) cls += ' wrong';
+      return `<div class="${cls}"></div>`;
+    }).join('');
+
+    let buttonsHTML = [1, 2, 3].map(ans => {
+      let cls = 'answer-btn';
+      if (answered) {
+        cls += ' answered';
+        if (quizState.answers[qi] === ans && ans === q.answer) cls = 'answer-btn selected-correct answered';
+        else if (quizState.answers[qi] === ans && ans !== q.answer) cls = 'answer-btn selected-wrong answered';
+        else if (ans === q.answer) cls = 'answer-btn reveal-correct answered';
+      }
+      return `<button class="${cls}" data-answer="${ans}" ${answered ? '' : `onclick="selectAnswer(${ans})"`}>
+        <span class="answer-indicator">${ans}</span>
+        <span>${ANSWER_LABELS[ans]}</span>
+      </button>`;
+    }).join('');
+
+    let explanationHTML = '';
+    if (answered) {
+      const isCorrect = quizState.answers[qi] === q.answer;
+      const quoteHTML = q.evidence ? `<div class="explanation-quote">\u201c${q.evidence}\u201d</div>` : '';
+      const nextLabel = qi < t.questions.length - 1 ? '\u0421\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0439 \u0432\u043e\u043f\u0440\u043e\u0441' : '\u0420\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u044b';
+      explanationHTML = `
+        <div class="explanation-panel">
+          <div class="explanation-label">${isCorrect ? '\u2705 \u041f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e!' : '\u274c \u041d\u0435\u0432\u0435\u0440\u043d\u043e \u2014 \u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u044b\u0439 \u043e\u0442\u0432\u0435\u0442: ' + ANSWER_LABELS[q.answer]}</div>
+          <div class="explanation-text">${q.explanation}</div>
+          ${quoteHTML}
+          <button class="quiz-next-btn" onclick="nextQuestion()">${nextLabel}</button>
+        </div>`;
+    }
+
+    app.innerHTML = `
+      <header class="app-header">
+        <div class="app-header-inner">
+          <button class="header-back" onclick="if(confirm('\u0412\u044b\u0439\u0442\u0438 \u0438\u0437 \u0442\u0435\u0441\u0442\u0430?')){location.hash='#text/${t.slug}'}">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="header-title">${t.title}</div>
+          <div style="width:40px"></div>
+        </div>
+      </header>
+      <div class="screen">
+        <div class="quiz-progress">${dotsHTML}</div>
+        <div class="quiz-question-num">\u0412\u043e\u043f\u0440\u043e\u0441 ${q.num}</div>
+        <div class="quiz-statement">${q.statement}</div>
+        <div class="quiz-answers">${buttonsHTML}</div>
+        ${explanationHTML}
+        ${!answered ? `<button class="show-text-btn" onclick="openTextSheet('${t.slug}')">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 6h12M3 9h12M3 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          \u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u0442\u0435\u043a\u0441\u0442
+        </button>` : ''}
+      </div>
+      <div class="bottom-sheet-overlay" id="bsOverlay" onclick="closeTextSheet()"></div>
+      <div class="bottom-sheet" id="bsSheet">
+        <div class="bottom-sheet-handle"></div>
+        <div class="bottom-sheet-title">${t.title}</div>
+        <div class="bottom-sheet-text">${textToParagraphs(t.text)}</div>
+        <button class="bottom-sheet-close" onclick="closeTextSheet()">\u0417\u0430\u043a\u0440\u044b\u0442\u044c</button>
+      </div>`;
+  }
+
+  window.selectAnswer = function(ans) {
+    const t = DATA.texts.find(x => x.slug === quizState.slug);
+    const qi = quizState.current;
+    const q = t.questions[qi];
+    quizState.answers[qi] = ans;
+    quizState.correct[qi] = (ans === q.answer);
+    renderQuizQuestion(t);
+  };
+
+  window.nextQuestion = function() {
+    const t = DATA.texts.find(x => x.slug === quizState.slug);
+    if (quizState.current < t.questions.length - 1) {
+      quizState.current++;
+      renderQuizQuestion(t);
+      window.scrollTo(0, 0);
+    } else {
+      const score = quizState.correct.filter(Boolean).length;
+      saveTextResult(quizState.slug, score, t.questions.length);
+      navigate(`#results/${quizState.slug}`);
+    }
+  };
+
+  window.openTextSheet = function(slug) {
+    document.getElementById('bsOverlay').classList.add('open');
+    document.getElementById('bsSheet').classList.add('open');
+  };
+  window.closeTextSheet = function() {
+    document.getElementById('bsOverlay').classList.remove('open');
+    document.getElementById('bsSheet').classList.remove('open');
+  };
+
+  /* ── RENDER: Results ── */
+  function renderResults(slug) {
+    const t = DATA.texts.find(x => x.slug === slug);
+    if (!t) { navigate('#home'); return; }
+
+    const score = quizState.slug === slug
+      ? quizState.correct.filter(Boolean).length
+      : getTextState(slug).bestScore || 0;
+    const total = t.questions.length;
+    const pct = score / total;
+    const circumference = 2 * Math.PI * 56;
+    const offset = circumference * (1 - pct);
+    const msg = getMessage(score, total);
+    const m = getMastery(score);
+    const ringColor = pct === 1 ? 'var(--gold)' : pct >= 0.7 ? 'var(--forest)' : pct >= 0.5 ? 'var(--sky)' : 'var(--coral)';
+
+    let qListHTML = t.questions.map((q, i) => {
+      const userAns = quizState.slug === slug ? quizState.answers[i] : null;
+      const isCorrect = userAns === q.answer;
+      const icon = userAns !== null ? (isCorrect ? '\u2713' : '\u2717') : '\u2022';
+      const iconCls = userAns !== null ? (isCorrect ? 'correct' : 'wrong') : 'correct';
+      return `<div class="results-q-item">
+        <div class="results-q-icon ${iconCls}">${icon}</div>
+        <div>
+          <div class="results-q-text">${q.num}. ${q.statement}</div>
+          <div class="results-q-answer">\u041e\u0442\u0432\u0435\u0442: ${ANSWER_LABELS[q.answer]} ${userAns !== null && userAns !== q.answer ? '(\u0442\u044b: ' + ANSWER_LABELS[userAns] + ')' : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    app.innerHTML = `
+      <header class="app-header">
+        <div class="app-header-inner">
+          <div class="header-title">\u0420\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u044b</div>
+        </div>
+      </header>
+      <div class="screen">
+        <div class="results-hero">
+          <div class="results-ring-wrap">
+            <svg viewBox="0 0 120 120">
+              <circle class="results-ring-bg" cx="60" cy="60" r="56"/>
+              <circle class="results-ring-fill" cx="60" cy="60" r="56" stroke="${ringColor}"
+                style="stroke-dasharray:${circumference};stroke-dashoffset:${circumference}"
+                id="resultRing"/>
+            </svg>
+            <div class="results-score">
+              <div class="results-score-num">${score}/${total}</div>
+              <div class="results-score-label">\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u043e</div>
+            </div>
+          </div>
+          <div class="results-message">${msg.title}</div>
+          <div class="results-sub">${msg.sub}</div>
+          ${m.level !== 'none' ? `<div class="results-mastery"><span class="mastery-seal mastery-${m.level}" style="width:28px;height:28px;font-size:14px;">${m.icon}</span> ${m.label}</div>` : ''}
+        </div>
+        <div class="results-questions">${qListHTML}</div>
+        <div class="results-actions">
+          <button class="btn-primary" onclick="quizState={};location.hash='#quiz/${slug}'">\u041f\u043e\u043f\u0440\u043e\u0431\u043e\u0432\u0430\u0442\u044c \u0435\u0449\u0451 \u0440\u0430\u0437</button>
+          <button class="btn-secondary" onclick="location.hash='#home'">\u041d\u0430 \u0433\u043b\u0430\u0432\u043d\u0443\u044e</button>
+        </div>
+      </div>
+      ${pct === 1 ? '<div class="confetti-container" id="confetti"></div>' : ''}`;
+
+    requestAnimationFrame(() => {
+      const ring = document.getElementById('resultRing');
+      if (ring) {
+        requestAnimationFrame(() => { ring.style.strokeDashoffset = offset; });
+      }
+      if (pct === 1) spawnConfetti();
+    });
+  }
+
+  function spawnConfetti() {
+    const container = document.getElementById('confetti');
+    if (!container) return;
+    const colors = ['#c19a4e', '#d4b877', '#2d6a4f', '#c44536', '#457b9d', '#f0e4c8', '#1a2744'];
+    for (let i = 0; i < 50; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (6 + Math.random() * 8) + 'px';
+      piece.style.height = (6 + Math.random() * 8) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+      piece.style.animationDelay = Math.random() * 0.8 + 's';
+      container.appendChild(piece);
+    }
+    setTimeout(() => { if (container) container.remove(); }, 5000);
+  }
+
+  /* ── RENDER: Progress ── */
+  function renderProgress() {
+    const stats = getTotalStats();
+    const textsCompleted = DATA.texts.filter(t => getTextState(t.slug).bestScore > 0).length;
+
+    let rowsHTML = DATA.texts.map(t => {
+      const ts = getTextState(t.slug);
+      const m = getMastery(ts.bestScore);
+      return `<div class="progress-row">
+        <div class="progress-row-emoji">${t.emoji}</div>
+        <div class="progress-row-title">${t.title}</div>
+        <div class="progress-row-score">${ts.bestScore > 0 ? ts.bestScore + '/7' : '\u2014'}</div>
+        ${m.level !== 'none' ? `<div class="mastery-seal mastery-${m.level}" style="width:26px;height:26px;font-size:13px;">${m.icon}</div>` : ''}
+      </div>`;
+    }).join('');
+
+    app.innerHTML = `
+      <header class="app-header">
+        <div class="app-header-inner">
+          <button class="header-back" onclick="location.hash='#home'">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            \u041d\u0430\u0437\u0430\u0434
+          </button>
+          <div class="header-title">\u041f\u0440\u043e\u0433\u0440\u0435\u0441\u0441</div>
+          <div style="width:60px"></div>
+        </div>
+      </header>
+      <div class="screen">
+        <div class="progress-header">
+          <div class="progress-title">\u0422\u0432\u043e\u0439 \u043f\u0440\u043e\u0433\u0440\u0435\u0441\u0441</div>
+          <div class="progress-sub">\u041f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430 \u043a \u041e\u0413\u042d \u2022 Reading</div>
+        </div>
+        <div class="progress-stats">
+          <div class="stat-card">
+            <div class="stat-num">${stats.totalCorrect}</div>
+            <div class="stat-label">\u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u044b\u0445</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">${textsCompleted}</div>
+            <div class="stat-label">\u0442\u0435\u043a\u0441\u0442\u043e\u0432</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">${state.streak.best}</div>
+            <div class="stat-label">\u043b\u0443\u0447\u0448\u0438\u0439 streak</div>
+          </div>
+        </div>
+        <div class="progress-grid">${rowsHTML}</div>
+        <button class="progress-reset" onclick="if(confirm('\u0421\u0431\u0440\u043e\u0441\u0438\u0442\u044c \u0432\u0435\u0441\u044c \u043f\u0440\u043e\u0433\u0440\u0435\u0441\u0441?')){state=defaultState();saveState();renderProgress();}">\u0421\u0431\u0440\u043e\u0441\u0438\u0442\u044c \u043f\u0440\u043e\u0433\u0440\u0435\u0441\u0441</button>
+      </div>`;
+  }
+
+  /* Make defaultState available globally for reset */
+  window.defaultState = defaultState;
+  window.saveState = saveState;
+  window.renderProgress = renderProgress;
+  window.quizState = quizState;
+
+  /* ── Init ── */
+  route();
+
+  /* Register service worker */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
