@@ -1988,9 +1988,11 @@ img { display: block; max-width: 100%; }
   }
 
   let currentHlSlug = null;
+  let hlDebounceTimer = null;
 
   function setupHighlightListener() {
-    document.addEventListener('selectionchange', () => {
+    /* Use mouseup/touchend instead of selectionchange to avoid flicker */
+    function showTooltipIfNeeded() {
       const existing = document.querySelector('.highlight-tooltip');
       if (existing) existing.remove();
 
@@ -2008,7 +2010,7 @@ img { display: block; max-width: 100%; }
 
       const tip = document.createElement('div');
       tip.className = 'highlight-tooltip';
-      tip.innerHTML = `<button class="hl-btn" onclick="addHighlight()">Выделить</button>`;
+      tip.innerHTML = `<button class="hl-btn" onpointerdown="event.stopPropagation(); addHighlight()">Выделить</button>`;
       document.body.appendChild(tip);
 
       const tipW = tip.offsetWidth;
@@ -2017,6 +2019,14 @@ img { display: block; max-width: 100%; }
       tip.style.left = left + 'px';
       tip.style.top = (rect.top - 44 + window.scrollY) + 'px';
       if (rect.top < 50) tip.style.top = (rect.bottom + 8 + window.scrollY) + 'px';
+    }
+
+    /* Debounced selectionchange — only show after selection settles */
+    document.addEventListener('selectionchange', () => {
+      clearTimeout(hlDebounceTimer);
+      const existing = document.querySelector('.highlight-tooltip');
+      if (existing) existing.remove();
+      hlDebounceTimer = setTimeout(showTooltipIfNeeded, 300);
     });
 
     document.addEventListener('pointerdown', (e) => {
